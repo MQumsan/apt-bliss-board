@@ -1,5 +1,6 @@
 import { LayoutDashboard, Building2, Users, DollarSign, FileCheck, BarChart3 } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Sidebar,
   SidebarContent,
@@ -13,14 +14,16 @@ import {
 
 export function AppSidebar() {
   const { t, lang } = useI18n();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const items = [
-    { title: t('dashboard'), icon: LayoutDashboard, active: true },
-    { title: t('properties'), icon: Building2 },
-    { title: t('tenants'), icon: Users },
-    { title: t('financials'), icon: DollarSign },
-    { title: t('cheques'), icon: FileCheck },
-    { title: t('reports'), icon: BarChart3 },
+    { title: t('dashboard'), icon: LayoutDashboard, path: '/' },
+    { title: t('properties'), icon: Building2, path: '/properties' },
+    { title: t('tenants'), icon: Users, path: '/tenants' },
+    { title: t('financials'), icon: DollarSign, path: '/financials' },
+    { title: t('cheques'), icon: FileCheck, path: '/cheques' },
+    { title: t('reports'), icon: BarChart3, path: '/reports' },
   ];
 
   const sidebarSide = lang === 'ar' ? 'right' : 'left';
@@ -42,16 +45,20 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    className={item.active ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'text-sidebar-foreground hover:bg-sidebar-accent/50'}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {items.map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <SidebarMenuItem key={item.path}>
+                    <SidebarMenuButton
+                      onClick={() => navigate(item.path)}
+                      className={isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'text-sidebar-foreground hover:bg-sidebar-accent/50 cursor-pointer'}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
