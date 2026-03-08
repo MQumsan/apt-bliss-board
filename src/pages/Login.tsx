@@ -4,8 +4,9 @@ import { useI18n } from '@/lib/i18n';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Building2, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import omanImage from '@/assets/oman-real-estate.jpg';
+import logoImage from '@/assets/al-mashreq-logo.png';
 
 const Login = () => {
   const { t, lang, toggleLang, dir } = useI18n();
@@ -20,6 +21,8 @@ const Login = () => {
   };
 
   const isAr = lang === 'ar';
+  const companyEn = 'Al Mashreq Real Estate Development';
+  const companyAr = 'المشرق للتطوير العقاري';
 
   return (
     <div className="min-h-screen flex" dir={dir}>
@@ -35,14 +38,10 @@ const Login = () => {
 
           {/* Mobile Branding */}
           <div className="lg:hidden flex flex-col items-center gap-3 mb-4">
-            <div className="h-14 w-14 rounded-xl bg-primary flex items-center justify-center">
-              <Building2 className="h-7 w-7 text-primary-foreground" />
-            </div>
+            <img src={logoImage} alt="Al Mashreq Logo" className="h-16 w-16" />
             <div className="text-center">
-              <h2 className="text-xl font-bold text-foreground">{t('appTitle')}</h2>
-              <p className="text-xs text-muted-foreground">
-                {isAr ? 'المشرق لإدارة العقارات' : 'Property Management System'}
-              </p>
+              <h2 className="text-lg font-bold text-foreground">{isAr ? companyAr : companyEn}</h2>
+              <p className="text-xs text-muted-foreground">{isAr ? companyEn : companyAr}</p>
             </div>
           </div>
 
@@ -115,7 +114,7 @@ const Login = () => {
           </form>
 
           <p className="text-center text-sm text-muted-foreground pt-4">
-            © 2026 Al-Mashreq PMS — {isAr ? 'جميع الحقوق محفوظة' : 'All rights reserved'}
+            © 2026 {isAr ? companyAr : companyEn} — {isAr ? 'جميع الحقوق محفوظة' : 'All rights reserved'}
           </p>
         </div>
       </div>
@@ -127,21 +126,18 @@ const Login = () => {
           alt="Modern Omani real estate"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        {/* Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
 
         {/* Branding */}
         <div className="relative z-10 flex flex-col items-center justify-center w-full p-12 text-center">
-          <div className="h-20 w-20 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center mb-6">
-            <Building2 className="h-10 w-10 text-white" />
-          </div>
-          <h2 className="text-4xl font-bold text-white tracking-tight">Al-Mashreq PMS</h2>
-          <p className="text-lg text-white/70 mt-1 font-arabic" dir="rtl">المشرق لإدارة العقارات</p>
+          <img src={logoImage} alt="Al Mashreq Logo" className="h-24 w-24 mb-6 drop-shadow-lg" />
+          <h2 className="text-3xl font-bold text-white tracking-tight">{companyEn}</h2>
+          <p className="text-xl text-white/80 mt-2" dir="rtl">{companyAr}</p>
           <div className="w-16 h-0.5 bg-white/30 my-6 rounded-full" />
           <p className="text-white/80 text-lg max-w-sm leading-relaxed">
             Your Property, Managed with Omani Excellence
           </p>
-          <p className="text-white/60 text-base mt-2 font-arabic" dir="rtl">
+          <p className="text-white/60 text-base mt-2" dir="rtl">
             عقاراتك، تُدار بتميز عماني
           </p>
         </div>

@@ -88,7 +88,7 @@ function printReceipt(record: IncomeRecord, lang: 'en' | 'ar') {
     </div>
     <div class="receipt-footer">
       <div class="footer-text">${isAr ? 'شكراً لكم — هذا إيصال رسمي' : 'Thank you — This is an official receipt'}</div>
-      <div class="footer-brand">Al-Mashreq PMS • ${new Date().getFullYear()}</div>
+      <div class="footer-brand">${isAr ? 'المشرق للتطوير العقاري' : 'Al Mashreq Real Estate Development'} • ${new Date().getFullYear()}</div>
     </div>
   </div>
 </body></html>`);
