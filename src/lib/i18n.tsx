@@ -108,6 +108,23 @@ const translations = {
     receiptDate: 'Receipt Date',
     propertyRequired: 'Property and Unit are required',
     selectProperty: 'Select Property',
+    // Cheques
+    chequeNumber: 'Cheque Number',
+    bankName: 'Bank Name',
+    dueDate: 'Due Date',
+    addCheque: 'Add Cheque',
+    chequeAdded: 'Cheque added successfully',
+    pending: 'Pending',
+    deposited: 'Deposited',
+    bounced: 'Bounced',
+    cancelled: 'Cancelled',
+    upcomingCheques: 'Upcoming Cheques',
+    noChequesDue: 'No cheques due soon',
+    // Reports
+    occupancyReport: 'Occupancy Report',
+    monthlyPL: 'Monthly Profit & Loss',
+    exportCsv: 'Export CSV',
+    total: 'Total',
   },
   ar: {
     dashboard: 'لوحة التحكم',
