@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { buildings as initialBuildings, Building, Unit } from './data';
 
 // Simple global state for buildings data shared between pages
@@ -9,20 +9,17 @@ function notify() {
   listeners.forEach(fn => fn());
 }
 
-export function useBuildings() {
+function useSubscribe(listenersSet: Set<() => void>) {
   const [, setTick] = useState(0);
-
-  const subscribe = useCallback(() => {
+  useEffect(() => {
     const rerender = () => setTick(t => t + 1);
-    listeners.add(rerender);
-    return () => { listeners.delete(rerender); };
-  }, []);
+    listenersSet.add(rerender);
+    return () => { listenersSet.delete(rerender); };
+  }, [listenersSet]);
+}
 
-  // Subscribe on mount
-  useState(() => {
-    const unsub = subscribe();
-    return unsub;
-  });
+export function useBuildings() {
+  useSubscribe(listeners);
 
   const assignUnit = useCallback((unitId: string, tenantName: string, contractEnd: string) => {
     globalBuildings = globalBuildings.map(b => ({
@@ -66,7 +63,6 @@ export interface Tenant {
   active: boolean;
 }
 
-// Extract existing tenants from building data
 function extractInitialTenants(): Tenant[] {
   const tenants: Tenant[] = [];
   initialBuildings.forEach(b => {
@@ -101,13 +97,7 @@ function notifyTenants() {
 }
 
 export function useTenants() {
-  const [, setTick] = useState(0);
-
-  useState(() => {
-    const rerender = () => setTick(t => t + 1);
-    tenantListeners.add(rerender);
-    return () => { tenantListeners.delete(rerender); };
-  });
+  useSubscribe(tenantListeners);
 
   const addTenant = useCallback((tenant: Omit<Tenant, 'id' | 'active'>) => {
     const newTenant: Tenant = {
@@ -121,4 +111,103 @@ export function useTenants() {
   }, []);
 
   return { tenants: globalTenants, addTenant };
+}
+
+// ─── Financial Records ───
+
+export type PaymentMethod = 'cash' | 'cheque' | 'transfer';
+export type IncomeCategory = 'rent' | 'deposit';
+export type ExpenseCategory = 'maintenance' | 'utilities' | 'commission' | 'other';
+
+export interface IncomeRecord {
+  id: string;
+  date: string;
+  tenantId: string;
+  tenantName: string;
+  unitNumber: string;
+  buildingName: string;
+  buildingNameAr: string;
+  amount: number;
+  method: PaymentMethod;
+  category: IncomeCategory;
+  statement: string;
+}
+
+export interface ExpenseRecord {
+  id: string;
+  date: string;
+  category: ExpenseCategory;
+  amount: number;
+  buildingName: string;
+  buildingNameAr: string;
+  unitNumber: string;
+  statement: string;
+}
+
+function generateInitialIncomes(): IncomeRecord[] {
+  const records: IncomeRecord[] = [];
+  const methods: PaymentMethod[] = ['cash', 'cheque', 'transfer'];
+  globalTenants.forEach((t, i) => {
+    records.push({
+      id: `inc-${i}`,
+      date: new Date(Date.now() - Math.floor(Math.random() * 60) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      tenantId: t.id,
+      tenantName: t.fullName,
+      unitNumber: t.unitNumber,
+      buildingName: t.buildingName,
+      buildingNameAr: t.buildingNameAr,
+      amount: Math.floor(t.annualRent / 12),
+      method: methods[i % 3],
+      category: 'rent',
+      statement: `Monthly rent payment - Unit ${t.unitNumber}`,
+    });
+  });
+  return records;
+}
+
+function generateInitialExpenses(): ExpenseRecord[] {
+  const categories: ExpenseCategory[] = ['maintenance', 'utilities', 'commission', 'other'];
+  const statements = [
+    'HVAC system repair',
+    'Monthly electricity bill',
+    'Real Estate Co. Commission',
+    'Building cleaning service',
+  ];
+  return initialBuildings.slice(0, 4).map((b, i) => ({
+    id: `exp-${i}`,
+    date: new Date(Date.now() - Math.floor(Math.random() * 45) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    category: categories[i % 4],
+    amount: Math.floor(1000 + Math.random() * 9000),
+    buildingName: b.name,
+    buildingNameAr: b.nameAr,
+    unitNumber: b.units[0]?.unitNumber || '',
+    statement: statements[i % 4],
+  }));
+}
+
+let globalIncomes: IncomeRecord[] = generateInitialIncomes();
+let globalExpenses: ExpenseRecord[] = generateInitialExpenses();
+let financeListeners: Set<() => void> = new Set();
+
+function notifyFinance() {
+  financeListeners.forEach(fn => fn());
+}
+
+export function useFinance() {
+  useSubscribe(financeListeners);
+
+  const addIncome = useCallback((record: Omit<IncomeRecord, 'id'>) => {
+    globalIncomes = [...globalIncomes, { ...record, id: `inc-${Date.now()}` }];
+    notifyFinance();
+  }, []);
+
+  const addExpense = useCallback((record: Omit<ExpenseRecord, 'id'>) => {
+    globalExpenses = [...globalExpenses, { ...record, id: `exp-${Date.now()}` }];
+    notifyFinance();
+  }, []);
+
+  const totalRevenue = globalIncomes.reduce((s, r) => s + r.amount, 0);
+  const totalExpenses = globalExpenses.reduce((s, r) => s + r.amount, 0);
+
+  return { incomes: globalIncomes, expenses: globalExpenses, addIncome, addExpense, totalRevenue, totalExpenses };
 }
