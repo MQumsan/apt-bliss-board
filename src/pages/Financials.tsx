@@ -196,7 +196,7 @@ const Financials = () => {
                   <TrendingUp className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-status-available">{totalRevenue.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">AED</span></p>
+                  <p className="text-2xl font-bold text-status-available">{formatCurrency(totalRevenue, lang)}</p>
                   <p className="text-xs text-muted-foreground font-medium">{t('grossIncome')}</p>
                 </div>
               </div>
