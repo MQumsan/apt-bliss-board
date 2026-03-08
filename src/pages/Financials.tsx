@@ -385,7 +385,7 @@ const Financials = () => {
                         <div>
                           <p className="text-sm font-medium text-muted-foreground">{t('netIncome')}</p>
                           <p className={`text-3xl font-bold ${plData.net >= 0 ? 'text-status-available' : 'text-status-occupied'}`}>
-                            {plData.net.toLocaleString()} <span className="text-base font-medium text-muted-foreground">AED</span>
+                            {formatCurrency(plData.net, lang)}
                           </p>
                         </div>
                       </div>
