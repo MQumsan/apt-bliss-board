@@ -324,7 +324,7 @@ const Financials = () => {
                           </TableCell>
                           <TableCell>{lang === 'ar' ? rec.buildingNameAr : rec.buildingName}</TableCell>
                           <TableCell>{rec.unitNumber}</TableCell>
-                          <TableCell className="text-end font-bold text-status-occupied whitespace-nowrap">{rec.amount.toLocaleString()} AED</TableCell>
+                          <TableCell className="text-end font-bold text-status-occupied whitespace-nowrap">{formatCurrency(rec.amount, lang)}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
