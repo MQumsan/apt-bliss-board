@@ -214,7 +214,7 @@ const Financials = () => {
                   <DollarSign className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className={`text-2xl font-bold ${plData.net >= 0 ? 'text-status-available' : 'text-status-occupied'}`}>{plData.net.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">AED</span></p>
+                  <p className={`text-2xl font-bold ${plData.net >= 0 ? 'text-status-available' : 'text-status-occupied'}`}>{formatCurrency(plData.net, lang)}</p>
                   <p className="text-xs text-muted-foreground font-medium">{t('netIncome')}</p>
                 </div>
               </div>
