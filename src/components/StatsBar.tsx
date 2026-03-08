@@ -17,8 +17,8 @@ export function StatsBar() {
     { label: t('occupancyRate'), value: `${Math.round((occupied / total) * 100)}%`, icon: Users, color: 'text-status-occupied bg-status-occupied/10' },
     { label: t('maintenanceRequests'), value: maintenance, icon: Wrench, color: 'text-status-maintenance bg-status-maintenance/10' },
     { label: t('expiringContracts'), value: expiring, icon: AlertTriangle, color: 'text-status-expiring bg-status-expiring/10' },
-    { label: t('totalRevenue'), value: `${totalRevenue.toLocaleString()}`, icon: TrendingUp, color: 'text-status-available bg-status-available/10' },
-    { label: t('totalExpensesLabel'), value: `${totalExpenses.toLocaleString()}`, icon: TrendingDown, color: 'text-status-occupied bg-status-occupied/10' },
+    { label: t('totalRevenue'), value: `${totalRevenue.toLocaleString('en',{minimumFractionDigits:3,maximumFractionDigits:3})} OMR`, icon: TrendingUp, color: 'text-status-available bg-status-available/10' },
+    { label: t('totalExpensesLabel'), value: `${totalExpenses.toLocaleString('en',{minimumFractionDigits:3,maximumFractionDigits:3})} OMR`, icon: TrendingDown, color: 'text-status-occupied bg-status-occupied/10' },
   ];
 
   return (
