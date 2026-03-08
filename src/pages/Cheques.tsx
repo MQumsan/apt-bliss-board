@@ -113,7 +113,7 @@ const Cheques = () => {
                       <TableCell className="font-medium">{c.tenantName}</TableCell>
                       <TableCell>{lang === 'ar' ? c.buildingNameAr : c.buildingName}</TableCell>
                       <TableCell>{c.unitNumber}</TableCell>
-                      <TableCell className="text-end font-bold whitespace-nowrap">{c.amount.toLocaleString()} AED</TableCell>
+                      <TableCell className="text-end font-bold whitespace-nowrap">{c.amount.toLocaleString('en', {minimumFractionDigits:3,maximumFractionDigits:3})} OMR</TableCell>
                       <TableCell>
                         <Select value={c.status} onValueChange={(v) => updateStatus(c.id, v as ChequeStatus)}>
                           <SelectTrigger className="h-7 w-[130px]">
