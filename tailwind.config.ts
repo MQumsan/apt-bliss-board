@@ -31,6 +31,22 @@ export default {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
+        "status-available": {
+          DEFAULT: "hsl(var(--status-available))",
+          foreground: "hsl(var(--status-available-foreground))",
+        },
+        "status-occupied": {
+          DEFAULT: "hsl(var(--status-occupied))",
+          foreground: "hsl(var(--status-occupied-foreground))",
+        },
+        "status-maintenance": {
+          DEFAULT: "hsl(var(--status-maintenance))",
+          foreground: "hsl(var(--status-maintenance-foreground))",
+        },
+        "status-expiring": {
+          DEFAULT: "hsl(var(--status-expiring))",
+          foreground: "hsl(var(--status-expiring-foreground))",
+        },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
