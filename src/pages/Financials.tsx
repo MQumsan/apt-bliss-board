@@ -278,7 +278,7 @@ const Financials = () => {
                           </TableCell>
                           <TableCell><Badge variant="secondary" className="bg-status-available/10 text-status-available border-status-available/20">{categoryLabel(rec.category)}</Badge></TableCell>
                           <TableCell><Badge variant="outline">{methodLabel(rec.method)}</Badge></TableCell>
-                          <TableCell className="text-end font-bold text-status-available whitespace-nowrap">{rec.amount.toLocaleString()} AED</TableCell>
+                          <TableCell className="text-end font-bold text-status-available whitespace-nowrap">{formatCurrency(rec.amount, lang)}</TableCell>
                           <TableCell>
                             <button onClick={() => printReceipt(rec, lang)} className="p-2 rounded-lg hover:bg-status-available/10 text-status-available transition-colors" title={t('generateReceipt')}>
                               <Printer className="h-4 w-4" />
