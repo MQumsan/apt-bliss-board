@@ -491,7 +491,7 @@ const Financials = () => {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>{t('amount')} (AED) *</Label>
+                <Label>{t('amount')} ({CURRENCY}) *</Label>
                 <Input type="number" min="0" value={expForm.amount} onChange={e => setExpForm(p => ({ ...p, amount: e.target.value }))} dir="ltr" />
               </div>
               <div className="space-y-1.5">
