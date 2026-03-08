@@ -108,6 +108,23 @@ const translations = {
     receiptDate: 'Receipt Date',
     propertyRequired: 'Property and Unit are required',
     selectProperty: 'Select Property',
+    // Cheques
+    chequeNumber: 'Cheque Number',
+    bankName: 'Bank Name',
+    dueDate: 'Due Date',
+    addCheque: 'Add Cheque',
+    chequeAdded: 'Cheque added successfully',
+    pending: 'Pending',
+    deposited: 'Deposited',
+    bounced: 'Bounced',
+    cancelled: 'Cancelled',
+    upcomingCheques: 'Upcoming Cheques',
+    noChequesDue: 'No cheques due soon',
+    // Reports
+    occupancyReport: 'Occupancy Report',
+    monthlyPL: 'Monthly Profit & Loss',
+    exportCsv: 'Export CSV',
+    total: 'Total',
   },
   ar: {
     dashboard: 'لوحة التحكم',
@@ -214,6 +231,23 @@ const translations = {
     receiptDate: 'تاريخ الإيصال',
     propertyRequired: 'العقار والوحدة مطلوبان',
     selectProperty: 'اختر العقار',
+    // Cheques
+    chequeNumber: 'رقم الشيك',
+    bankName: 'اسم البنك',
+    dueDate: 'تاريخ الاستحقاق',
+    addCheque: 'إضافة شيك',
+    chequeAdded: 'تمت إضافة الشيك بنجاح',
+    pending: 'قيد الانتظار',
+    deposited: 'تم الإيداع',
+    bounced: 'شيكات مرتجعة',
+    cancelled: 'ملغى',
+    upcomingCheques: 'شيكات قادمة',
+    noChequesDue: 'لا توجد شيكات مستحقة قريباً',
+    // Reports
+    occupancyReport: 'تقرير الإشغال',
+    monthlyPL: 'الأرباح والخسائر الشهرية',
+    exportCsv: 'تصدير CSV',
+    total: 'الإجمالي',
   },
 } as const;
 
