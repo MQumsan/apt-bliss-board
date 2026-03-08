@@ -1,13 +1,36 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Languages } from 'lucide-react';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
+import { BuildingTabs } from '@/components/BuildingTabs';
+import { StatsBar } from '@/components/StatsBar';
+import { useI18n } from '@/lib/i18n';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
+  const { t, toggleLang } = useI18n();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AppSidebar />
+        <div className="flex-1 flex flex-col">
+          <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger />
+              <h2 className="text-lg font-semibold text-foreground">{t('dashboard')}</h2>
+            </div>
+            <Button variant="ghost" size="sm" onClick={toggleLang} className="gap-2">
+              <Languages className="h-4 w-4" />
+              {t('language')}
+            </Button>
+          </header>
+          <main className="flex-1 p-6">
+            <StatsBar />
+            <BuildingTabs />
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 
