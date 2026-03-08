@@ -370,7 +370,7 @@ const Financials = () => {
                       ))}
                       <div className="flex items-center justify-between p-3 rounded-lg bg-status-occupied/15 border border-status-occupied/30 mt-2">
                         <span className="text-sm font-bold text-foreground">{t('totalExpensesLabel')}</span>
-                        <span className="text-lg font-bold text-status-occupied">{totalExpenses.toLocaleString()} AED</span>
+                        <span className="text-lg font-bold text-status-occupied">{formatCurrency(totalExpenses, lang)}</span>
                       </div>
                     </div>
                   </div>
