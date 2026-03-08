@@ -96,7 +96,7 @@ const Tenants = () => {
                         <TableCell dir="ltr" className="text-start">{tenant.nationalId}</TableCell>
                         <TableCell>{tenant.unitNumber}</TableCell>
                         <TableCell>{lang === 'ar' ? tenant.buildingNameAr : tenant.buildingName}</TableCell>
-                        <TableCell>{tenant.annualRent.toLocaleString()} AED</TableCell>
+                        <TableCell>{tenant.annualRent.toLocaleString('en', {minimumFractionDigits:3,maximumFractionDigits:3})} OMR</TableCell>
                         <TableCell>
                           <Badge variant={tenant.active ? 'default' : 'secondary'} className={tenant.active ? 'bg-status-available text-status-available-foreground' : ''}>
                             {tenant.active ? t('active') : t('inactive')}

@@ -125,16 +125,16 @@ const Reports = () => {
                       {monthlyPL.map(m => (
                         <TableRow key={m.month}>
                           <TableCell>{m.month}</TableCell>
-                          <TableCell className="text-end font-bold text-status-available">{m.income.toLocaleString()} AED</TableCell>
-                          <TableCell className="text-end font-bold text-status-occupied">{m.expense.toLocaleString()} AED</TableCell>
-                          <TableCell className={`text-end font-bold ${m.income - m.expense >= 0 ? 'text-status-available' : 'text-status-occupied'}`}>{(m.income - m.expense).toLocaleString()} AED</TableCell>
+                          <TableCell className="text-end font-bold text-status-available">{m.income.toLocaleString('en',{minimumFractionDigits:3,maximumFractionDigits:3})} OMR</TableCell>
+                          <TableCell className="text-end font-bold text-status-occupied">{m.expense.toLocaleString('en',{minimumFractionDigits:3,maximumFractionDigits:3})} OMR</TableCell>
+                          <TableCell className={`text-end font-bold ${m.income - m.expense >= 0 ? 'text-status-available' : 'text-status-occupied'}`}>{(m.income - m.expense).toLocaleString('en',{minimumFractionDigits:3,maximumFractionDigits:3})} OMR</TableCell>
                         </TableRow>
                       ))}
                       <TableRow className="bg-muted/50 font-bold">
                         <TableCell>{lang === 'ar' ? 'الإجمالي' : 'Total'}</TableCell>
-                        <TableCell className="text-end text-status-available">{totalRevenue.toLocaleString()} AED</TableCell>
-                        <TableCell className="text-end text-status-occupied">{totalExpenses.toLocaleString()} AED</TableCell>
-                        <TableCell className={`text-end ${totalRevenue - totalExpenses >= 0 ? 'text-status-available' : 'text-status-occupied'}`}>{(totalRevenue - totalExpenses).toLocaleString()} AED</TableCell>
+                        <TableCell className="text-end text-status-available">{totalRevenue.toLocaleString('en',{minimumFractionDigits:3,maximumFractionDigits:3})} OMR</TableCell>
+                        <TableCell className="text-end text-status-occupied">{totalExpenses.toLocaleString('en',{minimumFractionDigits:3,maximumFractionDigits:3})} OMR</TableCell>
+                        <TableCell className={`text-end ${totalRevenue - totalExpenses >= 0 ? 'text-status-available' : 'text-status-occupied'}`}>{(totalRevenue - totalExpenses).toLocaleString('en',{minimumFractionDigits:3,maximumFractionDigits:3})} OMR</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>

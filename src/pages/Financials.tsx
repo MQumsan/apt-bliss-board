@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, Printer, Plus, Languages, Percent, BarChart3 } from 'lucide-react';
+import { formatCurrency, CURRENCY } from '@/lib/currency';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { useI18n } from '@/lib/i18n';
@@ -82,7 +83,7 @@ function printReceipt(record: IncomeRecord, lang: 'en' | 'ar') {
       </div>
       <div class="amount-box">
         <div class="amount-label">${isAr ? 'المبلغ المدفوع' : 'Amount Paid'}</div>
-        <div class="amount-value">${record.amount.toLocaleString()} <span class="amount-currency">AED</span></div>
+        <div class="amount-value">${record.amount.toLocaleString('en', {minimumFractionDigits:3,maximumFractionDigits:3})} <span class="amount-currency">OMR</span></div>
       </div>
     </div>
     <div class="receipt-footer">
@@ -195,7 +196,7 @@ const Financials = () => {
                   <TrendingUp className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-status-available">{totalRevenue.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">AED</span></p>
+                  <p className="text-2xl font-bold text-status-available">{formatCurrency(totalRevenue, lang)}</p>
                   <p className="text-xs text-muted-foreground font-medium">{t('grossIncome')}</p>
                 </div>
               </div>
@@ -204,7 +205,7 @@ const Financials = () => {
                   <TrendingDown className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-status-occupied">{totalExpenses.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">AED</span></p>
+                  <p className="text-2xl font-bold text-status-occupied">{formatCurrency(totalExpenses, lang)}</p>
                   <p className="text-xs text-muted-foreground font-medium">{t('totalExpensesLabel')}</p>
                 </div>
               </div>
@@ -213,7 +214,7 @@ const Financials = () => {
                   <DollarSign className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className={`text-2xl font-bold ${plData.net >= 0 ? 'text-status-available' : 'text-status-occupied'}`}>{plData.net.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">AED</span></p>
+                  <p className={`text-2xl font-bold ${plData.net >= 0 ? 'text-status-available' : 'text-status-occupied'}`}>{formatCurrency(plData.net, lang)}</p>
                   <p className="text-xs text-muted-foreground font-medium">{t('netIncome')}</p>
                 </div>
               </div>
@@ -277,7 +278,7 @@ const Financials = () => {
                           </TableCell>
                           <TableCell><Badge variant="secondary" className="bg-status-available/10 text-status-available border-status-available/20">{categoryLabel(rec.category)}</Badge></TableCell>
                           <TableCell><Badge variant="outline">{methodLabel(rec.method)}</Badge></TableCell>
-                          <TableCell className="text-end font-bold text-status-available whitespace-nowrap">{rec.amount.toLocaleString()} AED</TableCell>
+                          <TableCell className="text-end font-bold text-status-available whitespace-nowrap">{formatCurrency(rec.amount, lang)}</TableCell>
                           <TableCell>
                             <button onClick={() => printReceipt(rec, lang)} className="p-2 rounded-lg hover:bg-status-available/10 text-status-available transition-colors" title={t('generateReceipt')}>
                               <Printer className="h-4 w-4" />
@@ -323,7 +324,7 @@ const Financials = () => {
                           </TableCell>
                           <TableCell>{lang === 'ar' ? rec.buildingNameAr : rec.buildingName}</TableCell>
                           <TableCell>{rec.unitNumber}</TableCell>
-                          <TableCell className="text-end font-bold text-status-occupied whitespace-nowrap">{rec.amount.toLocaleString()} AED</TableCell>
+                          <TableCell className="text-end font-bold text-status-occupied whitespace-nowrap">{formatCurrency(rec.amount, lang)}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -344,12 +345,12 @@ const Financials = () => {
                       {Object.entries(plData.incByCat).map(([cat, amount]) => (
                         <div key={cat} className="flex items-center justify-between p-3 rounded-lg bg-status-available/5 border border-status-available/10">
                           <span className="text-sm font-medium text-foreground">{categoryLabel(cat)}</span>
-                          <span className="text-sm font-bold text-status-available">{amount.toLocaleString()} AED</span>
+                          <span className="text-sm font-bold text-status-available">{formatCurrency(amount, lang)}</span>
                         </div>
                       ))}
                       <div className="flex items-center justify-between p-3 rounded-lg bg-status-available/15 border border-status-available/30 mt-2">
                         <span className="text-sm font-bold text-foreground">{t('grossIncome')}</span>
-                        <span className="text-lg font-bold text-status-available">{totalRevenue.toLocaleString()} AED</span>
+                        <span className="text-lg font-bold text-status-available">{formatCurrency(totalRevenue, lang)}</span>
                       </div>
                     </div>
                   </div>
@@ -364,12 +365,12 @@ const Financials = () => {
                       {Object.entries(plData.expByCat).map(([cat, amount]) => (
                         <div key={cat} className="flex items-center justify-between p-3 rounded-lg bg-status-occupied/5 border border-status-occupied/10">
                           <span className="text-sm font-medium text-foreground">{categoryLabel(cat)}</span>
-                          <span className="text-sm font-bold text-status-occupied">{amount.toLocaleString()} AED</span>
+                          <span className="text-sm font-bold text-status-occupied">{formatCurrency(amount, lang)}</span>
                         </div>
                       ))}
                       <div className="flex items-center justify-between p-3 rounded-lg bg-status-occupied/15 border border-status-occupied/30 mt-2">
                         <span className="text-sm font-bold text-foreground">{t('totalExpensesLabel')}</span>
-                        <span className="text-lg font-bold text-status-occupied">{totalExpenses.toLocaleString()} AED</span>
+                        <span className="text-lg font-bold text-status-occupied">{formatCurrency(totalExpenses, lang)}</span>
                       </div>
                     </div>
                   </div>
@@ -384,7 +385,7 @@ const Financials = () => {
                         <div>
                           <p className="text-sm font-medium text-muted-foreground">{t('netIncome')}</p>
                           <p className={`text-3xl font-bold ${plData.net >= 0 ? 'text-status-available' : 'text-status-occupied'}`}>
-                            {plData.net.toLocaleString()} <span className="text-base font-medium text-muted-foreground">AED</span>
+                            {formatCurrency(plData.net, lang)}
                           </p>
                         </div>
                       </div>
@@ -423,7 +424,7 @@ const Financials = () => {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>{t('amount')} (AED) *</Label>
+                <Label>{t('amount')} ({CURRENCY}) *</Label>
                 <Input type="number" min="0" value={incForm.amount} onChange={e => setIncForm(p => ({ ...p, amount: e.target.value }))} dir="ltr" />
               </div>
               <div className="space-y-1.5">
@@ -490,7 +491,7 @@ const Financials = () => {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>{t('amount')} (AED) *</Label>
+                <Label>{t('amount')} ({CURRENCY}) *</Label>
                 <Input type="number" min="0" value={expForm.amount} onChange={e => setExpForm(p => ({ ...p, amount: e.target.value }))} dir="ltr" />
               </div>
               <div className="space-y-1.5">
