@@ -205,6 +205,15 @@ const translations = {
     noRecordsFound: 'لا توجد سجلات',
     netIncome: 'صافي الدخل',
     property: 'العقار',
+    grossIncome: 'إجمالي الدخل',
+    profitLoss: 'الأرباح والخسائر',
+    profitMargin: 'هامش الربح',
+    incomeByCategory: 'الدخل حسب الفئة',
+    expenseByCategory: 'المصروفات حسب الفئة',
+    generateReceipt: 'إنشاء إيصال',
+    receiptDate: 'تاريخ الإيصال',
+    propertyRequired: 'العقار والوحدة مطلوبان',
+    selectProperty: 'اختر العقار',
   },
 } as const;
 
