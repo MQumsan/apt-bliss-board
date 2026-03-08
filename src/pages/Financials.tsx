@@ -365,7 +365,7 @@ const Financials = () => {
                       {Object.entries(plData.expByCat).map(([cat, amount]) => (
                         <div key={cat} className="flex items-center justify-between p-3 rounded-lg bg-status-occupied/5 border border-status-occupied/10">
                           <span className="text-sm font-medium text-foreground">{categoryLabel(cat)}</span>
-                          <span className="text-sm font-bold text-status-occupied">{amount.toLocaleString()} AED</span>
+                          <span className="text-sm font-bold text-status-occupied">{formatCurrency(amount, lang)}</span>
                         </div>
                       ))}
                       <div className="flex items-center justify-between p-3 rounded-lg bg-status-occupied/15 border border-status-occupied/30 mt-2">
