@@ -83,7 +83,7 @@ function printReceipt(record: IncomeRecord, lang: 'en' | 'ar') {
       </div>
       <div class="amount-box">
         <div class="amount-label">${isAr ? 'المبلغ المدفوع' : 'Amount Paid'}</div>
-        <div class="amount-value">${record.amount.toLocaleString()} <span class="amount-currency">AED</span></div>
+        <div class="amount-value">${record.amount.toLocaleString('en', {minimumFractionDigits:3,maximumFractionDigits:3})} <span class="amount-currency">OMR</span></div>
       </div>
     </div>
     <div class="receipt-footer">
