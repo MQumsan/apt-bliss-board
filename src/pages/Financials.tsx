@@ -350,7 +350,7 @@ const Financials = () => {
                       ))}
                       <div className="flex items-center justify-between p-3 rounded-lg bg-status-available/15 border border-status-available/30 mt-2">
                         <span className="text-sm font-bold text-foreground">{t('grossIncome')}</span>
-                        <span className="text-lg font-bold text-status-available">{totalRevenue.toLocaleString()} AED</span>
+                        <span className="text-lg font-bold text-status-available">{formatCurrency(totalRevenue, lang)}</span>
                       </div>
                     </div>
                   </div>
