@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/sidebar';
 
 export function AppSidebar() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
 
   const items = [
     { title: t('dashboard'), icon: LayoutDashboard, active: true },
