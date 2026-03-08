@@ -1,10 +1,10 @@
-import { useState, useMemo } from 'react';
-import { Languages, Plus, FileCheck, Download } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Languages, Plus, FileCheck, Download, AlertTriangle, Ban } from 'lucide-react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { useI18n } from '@/lib/i18n';
-import { useCheques, ChequeStatus } from '@/lib/chequeStore';
-import { useTenants } from '@/lib/store';
+import { useCheques, ChequeStatus, setOnChequeCleared } from '@/lib/chequeStore';
+import { useTenants, useFinance } from '@/lib/store';
 import { buildings } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,22 +13,47 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { exportToCsv } from '@/lib/exportCsv';
 
 const statusColors: Record<ChequeStatus, string> = {
   pending: 'bg-status-maintenance/10 text-status-maintenance border-status-maintenance/20',
-  deposited: 'bg-status-available/10 text-status-available border-status-available/20',
+  cleared: 'bg-status-available/10 text-status-available border-status-available/20',
   bounced: 'bg-status-occupied/10 text-status-occupied border-status-occupied/20',
   cancelled: 'bg-muted text-muted-foreground border-border',
 };
 
 const Cheques = () => {
   const { t, toggleLang, lang } = useI18n();
-  const { cheques, addCheque, updateStatus } = useCheques();
+  const { cheques, addCheque, updateStatus, getBouncedCheques } = useCheques();
   const { tenants } = useTenants();
+  const { addIncome } = useFinance();
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState({ chequeNumber: '', bankName: '', dueDate: '', amount: '', tenantId: '', status: 'pending' as ChequeStatus });
+
+  // Register the auto-income callback
+  useEffect(() => {
+    setOnChequeCleared((cheque) => {
+      addIncome({
+        date: new Date().toISOString().split('T')[0],
+        tenantId: cheque.tenantId,
+        tenantName: cheque.tenantName,
+        unitNumber: cheque.unitNumber,
+        buildingName: cheque.buildingName,
+        buildingNameAr: cheque.buildingNameAr,
+        amount: cheque.amount,
+        method: 'cheque',
+        category: 'rent',
+        statement: `Cheque ${cheque.chequeNumber} cleared — ${cheque.bankName}`,
+      });
+    });
+  }, [addIncome]);
+
+  const handleClear = (id: string) => {
+    updateStatus(id, 'cleared');
+    toast({ title: t('chequeCleared') });
+  };
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,6 +86,72 @@ const Cheques = () => {
     exportToCsv('cheques.csv', headers, rows);
   };
 
+  const bouncedCheques = getBouncedCheques();
+  const allCheques = cheques;
+  const isOverdue = (c: { status: ChequeStatus; dueDate: string }) => {
+    if (c.status !== 'pending') return false;
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return new Date(c.dueDate) < now;
+  };
+
+  const renderTable = (list: typeof cheques) => (
+    <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>{t('chequeNumber')}</TableHead>
+            <TableHead>{t('bankName')}</TableHead>
+            <TableHead>{t('dueDate')}</TableHead>
+            <TableHead>{t('tenantName')}</TableHead>
+            <TableHead>{t('property')}</TableHead>
+            <TableHead>{t('unitNumber')}</TableHead>
+            <TableHead className="text-end">{t('amount')}</TableHead>
+            <TableHead>{t('status')}</TableHead>
+            <TableHead></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {list.length === 0 ? (
+            <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">{t('noRecordsFound')}</TableCell></TableRow>
+          ) : list.map(c => (
+            <TableRow key={c.id} className={isOverdue(c) ? 'bg-destructive/5' : ''}>
+              <TableCell className="font-mono font-medium">{c.chequeNumber}</TableCell>
+              <TableCell>{c.bankName}</TableCell>
+              <TableCell className={`whitespace-nowrap ${isOverdue(c) ? 'text-destructive font-semibold' : ''}`}>
+                {c.dueDate}
+                {isOverdue(c) && <AlertTriangle className="inline-block h-3.5 w-3.5 ms-1 text-destructive" />}
+              </TableCell>
+              <TableCell className="font-medium">{c.tenantName}</TableCell>
+              <TableCell>{lang === 'ar' ? c.buildingNameAr : c.buildingName}</TableCell>
+              <TableCell>{c.unitNumber}</TableCell>
+              <TableCell className="text-end font-bold whitespace-nowrap">{c.amount.toLocaleString('en', {minimumFractionDigits:3,maximumFractionDigits:3})} OMR</TableCell>
+              <TableCell>
+                <Badge variant="outline" className={statusColors[c.status]}>{t(c.status as any)}</Badge>
+              </TableCell>
+              <TableCell>
+                <div className="flex gap-1">
+                  {c.status === 'pending' && (
+                    <>
+                      <Button size="sm" variant="outline" className="h-7 text-xs gap-1 border-status-available/30 text-status-available hover:bg-status-available/10" onClick={() => handleClear(c.id)}>
+                        <FileCheck className="h-3.5 w-3.5" />
+                        {t('markAsCleared')}
+                      </Button>
+                      <Button size="sm" variant="outline" className="h-7 text-xs gap-1 border-destructive/30 text-destructive hover:bg-destructive/10" onClick={() => { updateStatus(c.id, 'bounced'); }}>
+                        <Ban className="h-3.5 w-3.5" />
+                        {t('bounced')}
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -88,50 +179,30 @@ const Cheques = () => {
                 </Button>
               </div>
             </div>
-            <div className="rounded-lg border border-border bg-card overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t('chequeNumber')}</TableHead>
-                    <TableHead>{t('bankName')}</TableHead>
-                    <TableHead>{t('dueDate')}</TableHead>
-                    <TableHead>{t('tenantName')}</TableHead>
-                    <TableHead>{t('property')}</TableHead>
-                    <TableHead>{t('unitNumber')}</TableHead>
-                    <TableHead className="text-end">{t('amount')}</TableHead>
-                    <TableHead>{t('status')}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {cheques.length === 0 ? (
-                    <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">{t('noRecordsFound')}</TableCell></TableRow>
-                  ) : cheques.map(c => (
-                    <TableRow key={c.id}>
-                      <TableCell className="font-mono font-medium">{c.chequeNumber}</TableCell>
-                      <TableCell>{c.bankName}</TableCell>
-                      <TableCell className="whitespace-nowrap">{c.dueDate}</TableCell>
-                      <TableCell className="font-medium">{c.tenantName}</TableCell>
-                      <TableCell>{lang === 'ar' ? c.buildingNameAr : c.buildingName}</TableCell>
-                      <TableCell>{c.unitNumber}</TableCell>
-                      <TableCell className="text-end font-bold whitespace-nowrap">{c.amount.toLocaleString('en', {minimumFractionDigits:3,maximumFractionDigits:3})} OMR</TableCell>
-                      <TableCell>
-                        <Select value={c.status} onValueChange={(v) => updateStatus(c.id, v as ChequeStatus)}>
-                          <SelectTrigger className="h-7 w-[130px]">
-                            <Badge variant="outline" className={statusColors[c.status]}>{t(c.status as any)}</Badge>
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="pending">{t('pending')}</SelectItem>
-                            <SelectItem value="deposited">{t('deposited')}</SelectItem>
-                            <SelectItem value="bounced">{t('bounced')}</SelectItem>
-                            <SelectItem value="cancelled">{t('cancelled')}</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+
+            <Tabs defaultValue="all" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="all">{t('cheques')}</TabsTrigger>
+                <TabsTrigger value="bounced" className="gap-1.5">
+                  {t('bouncedCheques')}
+                  {bouncedCheques.length > 0 && (
+                    <Badge variant="destructive" className="h-5 min-w-5 px-1 text-xs">{bouncedCheques.length}</Badge>
+                  )}
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="all">
+                {renderTable(allCheques)}
+              </TabsContent>
+              <TabsContent value="bounced">
+                <div className="mb-3 flex items-center gap-2 p-3 rounded-lg bg-destructive/5 border border-destructive/15">
+                  <AlertTriangle className="h-4 w-4 text-destructive" />
+                  <span className="text-sm font-medium text-destructive">
+                    {lang === 'ar' ? 'شيكات مرتجعة تحتاج متابعة فورية مع المستأجرين' : 'Bounced cheques requiring immediate tenant follow-up'}
+                  </span>
+                </div>
+                {renderTable(bouncedCheques)}
+              </TabsContent>
+            </Tabs>
           </main>
         </div>
       </div>
