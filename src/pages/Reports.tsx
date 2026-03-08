@@ -132,9 +132,9 @@ const Reports = () => {
                       ))}
                       <TableRow className="bg-muted/50 font-bold">
                         <TableCell>{lang === 'ar' ? 'الإجمالي' : 'Total'}</TableCell>
-                        <TableCell className="text-end text-status-available">{totalRevenue.toLocaleString()} AED</TableCell>
-                        <TableCell className="text-end text-status-occupied">{totalExpenses.toLocaleString()} AED</TableCell>
-                        <TableCell className={`text-end ${totalRevenue - totalExpenses >= 0 ? 'text-status-available' : 'text-status-occupied'}`}>{(totalRevenue - totalExpenses).toLocaleString()} AED</TableCell>
+                        <TableCell className="text-end text-status-available">{totalRevenue.toLocaleString('en',{minimumFractionDigits:3,maximumFractionDigits:3})} OMR</TableCell>
+                        <TableCell className="text-end text-status-occupied">{totalExpenses.toLocaleString('en',{minimumFractionDigits:3,maximumFractionDigits:3})} OMR</TableCell>
+                        <TableCell className={`text-end ${totalRevenue - totalExpenses >= 0 ? 'text-status-available' : 'text-status-occupied'}`}>{(totalRevenue - totalExpenses).toLocaleString('en',{minimumFractionDigits:3,maximumFractionDigits:3})} OMR</TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>

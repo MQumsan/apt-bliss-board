@@ -154,7 +154,7 @@ const Cheques = () => {
                 <Input type="date" value={form.dueDate} onChange={e => setForm(p => ({ ...p, dueDate: e.target.value }))} />
               </div>
               <div className="space-y-1.5">
-                <Label>{t('amount')} (AED) *</Label>
+                <Label>{t('amount')} (OMR) *</Label>
                 <Input type="number" min="0" value={form.amount} onChange={e => setForm(p => ({ ...p, amount: e.target.value }))} dir="ltr" />
               </div>
               <div className="space-y-1.5 sm:col-span-2">

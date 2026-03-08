@@ -53,7 +53,7 @@ const Index = () => {
                         </div>
                       </div>
                       <div className="text-end">
-                        <p className="text-sm font-bold text-foreground">{c.amount.toLocaleString()} AED</p>
+                        <p className="text-sm font-bold text-foreground">{formatCurrency(c.amount, lang)}</p>
                         <p className="text-xs text-status-expiring font-medium">{t('dueDate')}: {c.dueDate}</p>
                       </div>
                     </div>
