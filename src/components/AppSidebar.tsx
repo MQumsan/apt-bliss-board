@@ -23,8 +23,10 @@ export function AppSidebar() {
     { title: t('reports'), icon: BarChart3 },
   ];
 
+  const sidebarSide = lang === 'ar' ? 'right' : 'left';
+
   return (
-    <Sidebar collapsible="icon" side={lang === 'ar' ? 'right' : 'left'}>
+    <Sidebar collapsible="icon" side={sidebarSide}>
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
