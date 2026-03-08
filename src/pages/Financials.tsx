@@ -205,7 +205,7 @@ const Financials = () => {
                   <TrendingDown className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-status-occupied">{totalExpenses.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">AED</span></p>
+                  <p className="text-2xl font-bold text-status-occupied">{formatCurrency(totalExpenses, lang)}</p>
                   <p className="text-xs text-muted-foreground font-medium">{t('totalExpensesLabel')}</p>
                 </div>
               </div>
