@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { I18nProvider } from "@/lib/i18n";
 import Index from "./pages/Index";
 import Tenants from "./pages/Tenants";
+import Financials from "./pages/Financials";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
