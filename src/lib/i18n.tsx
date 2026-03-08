@@ -231,6 +231,23 @@ const translations = {
     receiptDate: 'تاريخ الإيصال',
     propertyRequired: 'العقار والوحدة مطلوبان',
     selectProperty: 'اختر العقار',
+    // Cheques
+    chequeNumber: 'رقم الشيك',
+    bankName: 'اسم البنك',
+    dueDate: 'تاريخ الاستحقاق',
+    addCheque: 'إضافة شيك',
+    chequeAdded: 'تمت إضافة الشيك بنجاح',
+    pending: 'قيد الانتظار',
+    deposited: 'تم الإيداع',
+    bounced: 'شيكات مرتجعة',
+    cancelled: 'ملغى',
+    upcomingCheques: 'شيكات قادمة',
+    noChequesDue: 'لا توجد شيكات مستحقة قريباً',
+    // Reports
+    occupancyReport: 'تقرير الإشغال',
+    monthlyPL: 'الأرباح والخسائر الشهرية',
+    exportCsv: 'تصدير CSV',
+    total: 'الإجمالي',
   },
 } as const;
 
