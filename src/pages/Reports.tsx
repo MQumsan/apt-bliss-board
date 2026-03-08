@@ -125,9 +125,9 @@ const Reports = () => {
                       {monthlyPL.map(m => (
                         <TableRow key={m.month}>
                           <TableCell>{m.month}</TableCell>
-                          <TableCell className="text-end font-bold text-status-available">{m.income.toLocaleString()} AED</TableCell>
-                          <TableCell className="text-end font-bold text-status-occupied">{m.expense.toLocaleString()} AED</TableCell>
-                          <TableCell className={`text-end font-bold ${m.income - m.expense >= 0 ? 'text-status-available' : 'text-status-occupied'}`}>{(m.income - m.expense).toLocaleString()} AED</TableCell>
+                          <TableCell className="text-end font-bold text-status-available">{m.income.toLocaleString('en',{minimumFractionDigits:3,maximumFractionDigits:3})} OMR</TableCell>
+                          <TableCell className="text-end font-bold text-status-occupied">{m.expense.toLocaleString('en',{minimumFractionDigits:3,maximumFractionDigits:3})} OMR</TableCell>
+                          <TableCell className={`text-end font-bold ${m.income - m.expense >= 0 ? 'text-status-available' : 'text-status-occupied'}`}>{(m.income - m.expense).toLocaleString('en',{minimumFractionDigits:3,maximumFractionDigits:3})} OMR</TableCell>
                         </TableRow>
                       ))}
                       <TableRow className="bg-muted/50 font-bold">
