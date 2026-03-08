@@ -1,4 +1,5 @@
 import { Languages, FileCheck, AlertTriangle } from 'lucide-react';
+import { formatCurrency } from '@/lib/currency';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { BuildingTabs } from '@/components/BuildingTabs';
