@@ -32,7 +32,7 @@ export const api = {
     return !!API_BASE_URL;
   },
 
-  async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  async request(endpoint: string, options?: RequestInit): Promise<any> {
     if (!API_BASE_URL) {
       throw new Error('API_BASE_URL not configured. Set VITE_API_BASE_URL in your environment.');
     }
@@ -55,46 +55,46 @@ export const api = {
   },
 
   // Buildings
-  getBuildings() { return this.request<any[]>('/buildings'); },
+  getBuildings() { return this.request('/buildings'); },
   createBuilding(data: { name: string; nameAr: string }) {
-    return this.request<any>('/buildings', { method: 'POST', body: JSON.stringify(data) });
+    return this.request('/buildings', { method: 'POST', body: JSON.stringify(data) });
   },
 
   // Units
   createUnit(data: { buildingId: string; unitNumber: string; floor: number; type: string; status: string }) {
-    return this.request<any>('/units', { method: 'POST', body: JSON.stringify(data) });
+    return this.request('/units', { method: 'POST', body: JSON.stringify(data) });
   },
   updateUnit(id: string, data: Record<string, any>) {
-    return this.request<any>(`/units/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+    return this.request(`/units/${id}`, { method: 'PUT', body: JSON.stringify(data) });
   },
 
   // Payments
   recordPayment(data: Record<string, any>) {
-    return this.request<any>('/payments', { method: 'POST', body: JSON.stringify(data) });
+    return this.request('/payments', { method: 'POST', body: JSON.stringify(data) });
   },
 
   // Tenants
-  getTenants() { return this.request<any[]>('/tenants'); },
+  getTenants() { return this.request('/tenants'); },
   createTenant(data: Record<string, any>) {
-    return this.request<any>('/tenants', { method: 'POST', body: JSON.stringify(data) });
+    return this.request('/tenants', { method: 'POST', body: JSON.stringify(data) });
   },
 
   // Cheques
-  getCheques() { return this.request<any[]>('/cheques'); },
+  getCheques() { return this.request('/cheques'); },
   createCheque(data: Record<string, any>) {
-    return this.request<any>('/cheques', { method: 'POST', body: JSON.stringify(data) });
+    return this.request('/cheques', { method: 'POST', body: JSON.stringify(data) });
   },
   updateChequeStatus(id: string, status: string) {
-    return this.request<any>(`/cheques/${id}`, { method: 'PUT', body: JSON.stringify({ status }) });
+    return this.request(`/cheques/${id}`, { method: 'PUT', body: JSON.stringify({ status }) });
   },
 
   // Financials
-  getIncomes() { return this.request<any[]>('/incomes'); },
+  getIncomes() { return this.request('/incomes'); },
   createIncome(data: Record<string, any>) {
-    return this.request<any>('/incomes', { method: 'POST', body: JSON.stringify(data) });
+    return this.request('/incomes', { method: 'POST', body: JSON.stringify(data) });
   },
-  getExpenses() { return this.request<any[]>('/expenses'); },
+  getExpenses() { return this.request('/expenses'); },
   createExpense(data: Record<string, any>) {
-    return this.request<any>('/expenses', { method: 'POST', body: JSON.stringify(data) });
+    return this.request('/expenses', { method: 'POST', body: JSON.stringify(data) });
   },
 };

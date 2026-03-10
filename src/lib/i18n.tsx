@@ -266,6 +266,14 @@ const translations = {
     monthlyPL: 'الأرباح والخسائر الشهرية',
     exportCsv: 'تصدير CSV',
     total: 'الإجمالي',
+    addBuilding: 'إضافة مبنى',
+    addUnit: 'إضافة وحدة',
+    buildingAdded: 'تمت إضافة المبنى بنجاح',
+    unitAdded: 'تمت إضافة الوحدة بنجاح',
+    unitUpdated: 'تم تحديث الوحدة بنجاح',
+    buildingNameEn: 'اسم المبنى (إنجليزي)',
+    buildingNameAr: 'اسم المبنى (عربي)',
+    logout: 'تسجيل الخروج',
   },
 } as const;
 
