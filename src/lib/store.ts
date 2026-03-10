@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
-import { buildings as initialBuildings, Building, Unit } from './data';
+import { buildings as initialBuildings, Building, Unit, UnitStatus } from './data';
+import { api } from './api';
 
 // Simple global state for buildings data shared between pages
 let globalBuildings = [...initialBuildings.map(b => ({ ...b, units: [...b.units] }))];
@@ -29,6 +30,49 @@ export function useBuildings() {
       ),
     }));
     notify();
+    if (api.isConfigured()) {
+      api.updateUnit(unitId, { status: 'Occupied', tenantName, contractEnd }).catch(console.error);
+    }
+  }, []);
+
+  const updateUnit = useCallback((unitId: string, updates: Partial<Pick<Unit, 'status' | 'tenantName' | 'contractEnd'>>) => {
+    globalBuildings = globalBuildings.map(b => ({
+      ...b,
+      units: b.units.map(u =>
+        u.id === unitId ? { ...u, ...updates } : u
+      ),
+    }));
+    notify();
+    if (api.isConfigured()) {
+      api.updateUnit(unitId, updates).catch(console.error);
+    }
+  }, []);
+
+  const addBuilding = useCallback((name: string, nameAr: string) => {
+    const newBuilding: Building = {
+      id: `b-${Date.now()}`,
+      name,
+      nameAr,
+      units: [],
+    };
+    globalBuildings = [...globalBuildings, newBuilding];
+    notify();
+    if (api.isConfigured()) {
+      api.createBuilding({ name, nameAr }).catch(console.error);
+    }
+    return newBuilding;
+  }, []);
+
+  const addUnit = useCallback((buildingId: string, unit: Omit<Unit, 'id'>) => {
+    const newUnit: Unit = { ...unit, id: `u-${Date.now()}` };
+    globalBuildings = globalBuildings.map(b =>
+      b.id === buildingId ? { ...b, units: [...b.units, newUnit] } : b
+    );
+    notify();
+    if (api.isConfigured()) {
+      api.createUnit({ buildingId, unitNumber: unit.unitNumber, floor: unit.floor, type: unit.type, status: unit.status }).catch(console.error);
+    }
+    return newUnit;
   }, []);
 
   const getAvailableUnits = useCallback(() => {
@@ -43,7 +87,7 @@ export function useBuildings() {
     return result;
   }, []);
 
-  return { buildings: globalBuildings, assignUnit, getAvailableUnits };
+  return { buildings: globalBuildings, assignUnit, updateUnit, addBuilding, addUnit, getAvailableUnits };
 }
 
 export interface Tenant {
@@ -107,6 +151,9 @@ export function useTenants() {
     };
     globalTenants = [...globalTenants, newTenant];
     notifyTenants();
+    if (api.isConfigured()) {
+      api.createTenant(newTenant).catch(console.error);
+    }
     return newTenant;
   }, []);
 
@@ -197,13 +244,21 @@ export function useFinance() {
   useSubscribe(financeListeners);
 
   const addIncome = useCallback((record: Omit<IncomeRecord, 'id'>) => {
-    globalIncomes = [...globalIncomes, { ...record, id: `inc-${Date.now()}` }];
+    const newRecord = { ...record, id: `inc-${Date.now()}` };
+    globalIncomes = [...globalIncomes, newRecord];
     notifyFinance();
+    if (api.isConfigured()) {
+      api.createIncome(newRecord).catch(console.error);
+    }
   }, []);
 
   const addExpense = useCallback((record: Omit<ExpenseRecord, 'id'>) => {
-    globalExpenses = [...globalExpenses, { ...record, id: `exp-${Date.now()}` }];
+    const newRecord = { ...record, id: `exp-${Date.now()}` };
+    globalExpenses = [...globalExpenses, newRecord];
     notifyFinance();
+    if (api.isConfigured()) {
+      api.createExpense(newRecord).catch(console.error);
+    }
   }, []);
 
   const totalRevenue = globalIncomes.reduce((s, r) => s + r.amount, 0);

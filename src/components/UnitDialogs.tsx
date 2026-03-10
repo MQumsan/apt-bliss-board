@@ -5,8 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useI18n } from '@/lib/i18n';
-import { Unit, getEffectiveStatus } from '@/lib/data';
+import { Unit, UnitStatus, getEffectiveStatus } from '@/lib/data';
+import { useBuildings, useFinance } from '@/lib/store';
 import { cn } from '@/lib/utils';
+import { toast } from '@/hooks/use-toast';
 
 const statusConfig = {
   Available: 'bg-status-available text-status-available-foreground',
@@ -60,11 +62,23 @@ export function ViewUnitDialog({ unit, open, onOpenChange }: { unit: Unit; open:
   );
 }
 
-// EDIT DIALOG
+// EDIT DIALOG — now saves changes to global store (and API if configured)
 export function EditUnitDialog({ unit, open, onOpenChange }: { unit: Unit; open: boolean; onOpenChange: (v: boolean) => void }) {
   const { t } = useI18n();
+  const { updateUnit } = useBuildings();
   const [tenantName, setTenantName] = useState(unit.tenantName || '');
-  const [status, setStatus] = useState(unit.status);
+  const [status, setStatus] = useState<UnitStatus>(unit.status);
+  const [contractEnd, setContractEnd] = useState(unit.contractEnd || '');
+
+  const handleSave = () => {
+    updateUnit(unit.id, {
+      status,
+      tenantName: tenantName.trim() || undefined,
+      contractEnd: contractEnd || undefined,
+    });
+    toast({ title: t('unitUpdated') });
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -79,7 +93,7 @@ export function EditUnitDialog({ unit, open, onOpenChange }: { unit: Unit; open:
           </div>
           <div className="space-y-2">
             <Label>{t('status')}</Label>
-            <Select value={status} onValueChange={(v) => setStatus(v as any)}>
+            <Select value={status} onValueChange={(v) => setStatus(v as UnitStatus)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -90,20 +104,56 @@ export function EditUnitDialog({ unit, open, onOpenChange }: { unit: Unit; open:
               </SelectContent>
             </Select>
           </div>
+          <div className="space-y-2">
+            <Label>{t('contractEnd')}</Label>
+            <Input type="date" value={contractEnd} onChange={(e) => setContractEnd(e.target.value)} />
+          </div>
         </div>
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>{t('cancel')}</Button>
-          <Button onClick={() => onOpenChange(false)}>{t('save')}</Button>
+          <Button onClick={handleSave}>{t('save')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-// PAYMENT DIALOG
+// PAYMENT DIALOG — records income to financial store (and API if configured)
 export function PaymentDialog({ unit, open, onOpenChange }: { unit: Unit; open: boolean; onOpenChange: (v: boolean) => void }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const { addIncome } = useFinance();
+  const { buildings } = useBuildings();
   const [amount, setAmount] = useState('');
+  const [method, setMethod] = useState<'cash' | 'cheque' | 'transfer'>('cash');
+  const [statement, setStatement] = useState('');
+
+  // Find building for this unit
+  const building = buildings.find(b => b.units.some(u => u.id === unit.id));
+
+  const handleRecord = () => {
+    if (!amount || Number(amount) <= 0) {
+      toast({ title: t('fillRequired'), variant: 'destructive' });
+      return;
+    }
+
+    addIncome({
+      date: new Date().toISOString().split('T')[0],
+      tenantId: '',
+      tenantName: unit.tenantName || '',
+      unitNumber: unit.unitNumber,
+      buildingName: building?.name || '',
+      buildingNameAr: building?.nameAr || '',
+      amount: Number(amount),
+      method,
+      category: 'rent',
+      statement: statement.trim() || `Payment - Unit ${unit.unitNumber}`,
+    });
+
+    toast({ title: t('incomeAdded') });
+    setAmount('');
+    setStatement('');
+    onOpenChange(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -117,13 +167,30 @@ export function PaymentDialog({ unit, open, onOpenChange }: { unit: Unit; open: 
             <p className="font-medium text-foreground">{unit.tenantName || t('noTenant')}</p>
           </div>
           <div className="space-y-2">
-            <Label>{t('amount')}</Label>
-            <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" />
+            <Label>{t('amount')} (OMR) *</Label>
+            <Input type="number" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.000" dir="ltr" />
+          </div>
+          <div className="space-y-2">
+            <Label>{t('paymentMethod')}</Label>
+            <Select value={method} onValueChange={(v) => setMethod(v as any)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cash">{t('cash')}</SelectItem>
+                <SelectItem value="cheque">{t('cheque')}</SelectItem>
+                <SelectItem value="transfer">{t('transfer')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>{t('statement')}</Label>
+            <Input value={statement} onChange={(e) => setStatement(e.target.value)} placeholder={lang === 'ar' ? 'ملاحظات...' : 'Notes...'} />
           </div>
         </div>
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>{t('cancel')}</Button>
-          <Button onClick={() => onOpenChange(false)}>{t('recordPayment')}</Button>
+          <Button onClick={handleRecord}>{t('recordPayment')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
