@@ -19,15 +19,22 @@ const Properties = () => {
         <AppSidebar />
         <div className="flex-1 flex flex-col">
           <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
               <SidebarTrigger />
               <h2 className="text-lg font-semibold text-foreground">{t('properties')}</h2>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button size="sm" onClick={() => setAddBuildingOpen(true)} className="gap-1.5">
+              
+              {/* زر الإضافة الجديد بجانب العنوان مباشرة بلون مميز لسهولة الوصول */}
+              <Button 
+                size="sm" 
+                onClick={() => setAddBuildingOpen(true)} 
+                className="bg-primary hover:opacity-90 text-primary-foreground gap-1.5 px-4 shadow-sm"
+              >
                 <Plus className="h-4 w-4" />
-                {t('addBuilding')}
+                إضافة بناية جديدة
               </Button>
+            </div>
+            
+            <div className="flex items-center gap-2">
               <Button variant="ghost" size="sm" onClick={toggleLang} className="gap-2">
                 <Languages className="h-4 w-4" />
                 {t('language')}
