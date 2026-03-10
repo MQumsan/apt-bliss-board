@@ -1,10 +1,11 @@
 import { Building2, Users, Wrench, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
-import { buildings, getEffectiveStatus } from '@/lib/data';
-import { useFinance } from '@/lib/store';
+import { getEffectiveStatus } from '@/lib/data';
+import { useBuildings, useFinance } from '@/lib/store';
 
 export function StatsBar() {
   const { t } = useI18n();
+  const { buildings } = useBuildings();
   const { totalRevenue, totalExpenses } = useFinance();
   const allUnits = buildings.flatMap(b => b.units);
   const total = allUnits.length;
