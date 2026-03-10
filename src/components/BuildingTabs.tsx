@@ -1,14 +1,21 @@
 import { useState } from 'react';
+import { Plus } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { useI18n } from '@/lib/i18n';
-import { buildings, getEffectiveStatus } from '@/lib/data';
+import { getEffectiveStatus } from '@/lib/data';
+import { useBuildings } from '@/lib/store';
 import { UnitCard } from './UnitCard';
 import { FilterBar } from './FilterBar';
+import { AddUnitDialog } from './AddUnitDialog';
 
 export function BuildingTabs() {
   const { lang, t } = useI18n();
+  const { buildings } = useBuildings();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [addUnitOpen, setAddUnitOpen] = useState(false);
+  const [addUnitBuildingId, setAddUnitBuildingId] = useState('');
 
   return (
     <div>
@@ -18,7 +25,7 @@ export function BuildingTabs() {
         statusFilter={statusFilter}
         onStatusFilterChange={setStatusFilter}
       />
-      <Tabs defaultValue={buildings[0].id} className="w-full">
+      <Tabs defaultValue={buildings[0]?.id} className="w-full">
         <TabsList className="bg-muted mb-6 h-auto flex-wrap gap-1 p-1">
           {buildings.map((b) => (
             <TabsTrigger
@@ -45,6 +52,12 @@ export function BuildingTabs() {
 
           return (
             <TabsContent key={building.id} value={building.id}>
+              <div className="flex justify-end mb-4">
+                <Button size="sm" onClick={() => { setAddUnitBuildingId(building.id); setAddUnitOpen(true); }} className="gap-1.5">
+                  <Plus className="h-4 w-4" />
+                  {t('addUnit')}
+                </Button>
+              </div>
               <div className="space-y-6">
                 {floors.length === 0 && (
                   <p className="text-center text-muted-foreground py-8">{t('noTenant')}</p>
@@ -70,6 +83,8 @@ export function BuildingTabs() {
           );
         })}
       </Tabs>
+
+      <AddUnitDialog open={addUnitOpen} onOpenChange={setAddUnitOpen} buildingId={addUnitBuildingId} />
     </div>
   );
 }

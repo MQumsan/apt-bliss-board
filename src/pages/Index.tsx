@@ -1,4 +1,6 @@
-import { Languages, FileCheck, AlertTriangle } from 'lucide-react';
+import { useState } from 'react';
+import { Languages, FileCheck, AlertTriangle, Plus, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { formatCurrency } from '@/lib/currency';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
@@ -8,12 +10,15 @@ import { useI18n } from '@/lib/i18n';
 import { useCheques } from '@/lib/chequeStore';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { AddBuildingDialog } from '@/components/AddBuildingDialog';
 
 const Index = () => {
   const { t, toggleLang, lang } = useI18n();
+  const navigate = useNavigate();
   const { getUpcomingCheques, getOverduePendingCheques } = useCheques();
   const upcoming = getUpcomingCheques(7);
   const overdue = getOverduePendingCheques();
+  const [addBuildingOpen, setAddBuildingOpen] = useState(false);
 
   return (
     <SidebarProvider>
@@ -25,10 +30,20 @@ const Index = () => {
               <SidebarTrigger />
               <h2 className="text-lg font-semibold text-foreground">{t('dashboard')}</h2>
             </div>
-            <Button variant="ghost" size="sm" onClick={toggleLang} className="gap-2">
-              <Languages className="h-4 w-4" />
-              {t('language')}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button size="sm" onClick={() => setAddBuildingOpen(true)} className="gap-1.5">
+                <Plus className="h-4 w-4" />
+                {t('addBuilding')}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={toggleLang} className="gap-2">
+                <Languages className="h-4 w-4" />
+                {t('language')}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/login')} className="gap-1.5 text-muted-foreground">
+                <LogOut className="h-4 w-4" />
+                {t('logout')}
+              </Button>
+            </div>
           </header>
           <main className="flex-1 p-6">
             <StatsBar />
@@ -99,6 +114,7 @@ const Index = () => {
           </main>
         </div>
       </div>
+      <AddBuildingDialog open={addBuildingOpen} onOpenChange={setAddBuildingOpen} />
     </SidebarProvider>
   );
 };

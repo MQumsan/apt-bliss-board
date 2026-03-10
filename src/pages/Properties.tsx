@@ -1,12 +1,17 @@
-import { Languages } from 'lucide-react';
+import { useState } from 'react';
+import { Languages, Plus, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { BuildingTabs } from '@/components/BuildingTabs';
 import { useI18n } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
+import { AddBuildingDialog } from '@/components/AddBuildingDialog';
 
 const Properties = () => {
   const { t, toggleLang } = useI18n();
+  const navigate = useNavigate();
+  const [addBuildingOpen, setAddBuildingOpen] = useState(false);
 
   return (
     <SidebarProvider>
@@ -18,16 +23,27 @@ const Properties = () => {
               <SidebarTrigger />
               <h2 className="text-lg font-semibold text-foreground">{t('properties')}</h2>
             </div>
-            <Button variant="ghost" size="sm" onClick={toggleLang} className="gap-2">
-              <Languages className="h-4 w-4" />
-              {t('language')}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button size="sm" onClick={() => setAddBuildingOpen(true)} className="gap-1.5">
+                <Plus className="h-4 w-4" />
+                {t('addBuilding')}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={toggleLang} className="gap-2">
+                <Languages className="h-4 w-4" />
+                {t('language')}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/login')} className="gap-1.5 text-muted-foreground">
+                <LogOut className="h-4 w-4" />
+                {t('logout')}
+              </Button>
+            </div>
           </header>
           <main className="flex-1 p-6">
             <BuildingTabs />
           </main>
         </div>
       </div>
+      <AddBuildingDialog open={addBuildingOpen} onOpenChange={setAddBuildingOpen} />
     </SidebarProvider>
   );
 };
