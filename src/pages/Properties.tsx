@@ -11,9 +11,21 @@ import { AddBuildingDialog } from '@/components/AddBuildingDialog';
 import { exportToCsv } from '@/lib/exportCsv';
 
 const Properties = () => {
-  const { t, toggleLang } = useI18n();
+  const { t, toggleLang, lang } = useI18n();
   const navigate = useNavigate();
+  const { buildings } = useBuildings();
   const [addBuildingOpen, setAddBuildingOpen] = useState(false);
+
+  const handleExportBuildings = () => {
+    const headers = [lang === 'ar' ? 'المبنى' : 'Building', lang === 'ar' ? 'الوحدة' : 'Unit', lang === 'ar' ? 'الطابق' : 'Floor', lang === 'ar' ? 'النوع' : 'Type', lang === 'ar' ? 'الحالة' : 'Status', lang === 'ar' ? 'المستأجر' : 'Tenant'];
+    const rows: string[][] = [];
+    buildings.forEach(b => {
+      b.units.forEach(u => {
+        rows.push([lang === 'ar' ? b.nameAr : b.name, u.unitNumber, String(u.floor), u.type, u.status, u.tenantName || '']);
+      });
+    });
+    exportToCsv('buildings.csv', headers, rows);
+  };
 
   return (
     <SidebarProvider>
