@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { UserPlus, Search, Users } from 'lucide-react';
+import { UserPlus, Search, Users, Download } from 'lucide-react';
+import { exportToCsv } from '@/lib/exportCsv';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { useI18n } from '@/lib/i18n';
