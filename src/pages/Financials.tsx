@@ -321,7 +321,14 @@ const Financials = () => {
 
               {/* INCOMES TAB */}
               <TabsContent value="incomes">
-                <div className="flex justify-end mb-4">
+                <div className="flex justify-end gap-2 mb-4">
+                  <Button variant="outline" size="sm" onClick={() => {
+                    const headers = [t('date'), t('tenantName'), t('unitNumber') + '/' + t('property'), t('statement'), t('category'), t('paymentMethod'), t('amount')];
+                    const rows = incomes.map(r => [r.date, r.tenantName, `${r.unitNumber} - ${lang === 'ar' ? r.buildingNameAr : r.buildingName}`, r.statement, categoryLabel(r.category), methodLabel(r.method), String(r.amount)]);
+                    exportToCsv('incomes.csv', headers, rows);
+                  }} className="gap-1.5">
+                    <Download className="h-4 w-4" />{t('exportCsv')}
+                  </Button>
                   <Button onClick={() => setAddIncomeOpen(true)} className="gap-2 bg-status-available hover:bg-status-available/90 text-status-available-foreground">
                     <Plus className="h-4 w-4" />{t('addIncome')}
                   </Button>
