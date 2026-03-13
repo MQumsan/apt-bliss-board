@@ -403,7 +403,7 @@ const Financials = () => {
                     </TableHeader>
                     <TableBody>
                       {expenses.length === 0 ? (
-                        <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{t('noRecordsFound')}</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{t('noRecordsFound')}</TableCell></TableRow>
                       ) : expenses.map(rec => (
                         <TableRow key={rec.id} className="hover:bg-status-occupied/5">
                           <TableCell className="whitespace-nowrap">{rec.date}</TableCell>
