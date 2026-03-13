@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Languages, FileCheck, AlertTriangle, Plus, LogOut } from 'lucide-react';
+import { Languages, FileCheck, AlertTriangle, Plus, LogOut, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { formatCurrency } from '@/lib/currency';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
@@ -8,6 +8,7 @@ import { BuildingTabs } from '@/components/BuildingTabs';
 import { StatsBar } from '@/components/StatsBar';
 import { useI18n } from '@/lib/i18n';
 import { useCheques } from '@/lib/chequeStore';
+import { useContracts } from '@/lib/contractStore';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AddBuildingDialog } from '@/components/AddBuildingDialog';
@@ -16,8 +17,10 @@ const Index = () => {
   const { t, toggleLang, lang } = useI18n();
   const navigate = useNavigate();
   const { getUpcomingCheques, getOverduePendingCheques } = useCheques();
+  const { getExpiringContracts } = useContracts();
   const upcoming = getUpcomingCheques(7);
   const overdue = getOverduePendingCheques();
+  const expiringContracts = getExpiringContracts(30);
   const [addBuildingOpen, setAddBuildingOpen] = useState(false);
 
   return (
@@ -47,6 +50,31 @@ const Index = () => {
           </header>
           <main className="flex-1 p-6">
             <StatsBar />
+
+            {/* Expiring Contracts Alert */}
+            {expiringContracts.length > 0 && (
+              <div className="bg-status-expiring/5 rounded-lg border border-status-expiring/20 p-4 mb-4">
+                <h3 className="text-sm font-semibold text-status-expiring flex items-center gap-2 mb-3">
+                  <FileText className="h-4 w-4" />
+                  {lang === 'ar' ? 'عقود تنتهي قريباً' : 'Expiring Contracts'}
+                  <Badge className="bg-status-expiring text-status-expiring-foreground h-5 min-w-5 px-1.5 text-xs">{expiringContracts.length}</Badge>
+                </h3>
+                <div className="space-y-2">
+                  {expiringContracts.map(c => (
+                    <div key={c.id} className="flex items-center justify-between p-3 rounded-lg bg-status-expiring/5 border border-status-expiring/15">
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{c.tenantName}</p>
+                        <p className="text-xs text-muted-foreground">{c.unitNumber} — {lang === 'ar' ? c.buildingNameAr : c.buildingName}</p>
+                      </div>
+                      <div className="text-end">
+                        <p className="text-sm font-bold text-status-expiring">{formatCurrency(c.annualRent, lang)}</p>
+                        <p className="text-xs text-status-expiring">{t('contractEnd')}: {c.endDate}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Overdue Cheques Alert */}
             {overdue.length > 0 && (

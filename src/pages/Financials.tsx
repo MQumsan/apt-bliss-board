@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { DollarSign, TrendingUp, TrendingDown, Printer, Plus, Languages, Percent, BarChart3 } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Printer, Plus, Languages, Percent, BarChart3, Download } from 'lucide-react';
+import { exportToCsv } from '@/lib/exportCsv';
 import { formatCurrency, CURRENCY } from '@/lib/currency';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';

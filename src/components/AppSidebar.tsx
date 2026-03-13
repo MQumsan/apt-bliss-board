@@ -1,4 +1,4 @@
-import { LayoutDashboard, Building2, Users, DollarSign, FileCheck, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, DollarSign, FileCheck, BarChart3, FileText, Wrench } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -21,7 +21,9 @@ export function AppSidebar() {
     { title: t('dashboard'), icon: LayoutDashboard, path: '/' },
     { title: t('properties'), icon: Building2, path: '/properties' },
     { title: t('tenants'), icon: Users, path: '/tenants' },
+    { title: lang === 'ar' ? 'العقود' : 'Contracts', icon: FileText, path: '/contracts' },
     { title: t('financials'), icon: DollarSign, path: '/financials' },
+    { title: lang === 'ar' ? 'الصيانة' : 'Maintenance', icon: Wrench, path: '/maintenance' },
     { title: t('cheques'), icon: FileCheck, path: '/cheques' },
     { title: t('reports'), icon: BarChart3, path: '/reports' },
   ];

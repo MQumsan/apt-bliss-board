@@ -62,10 +62,19 @@ const Tenants = () => {
                   className="ps-9"
                 />
               </div>
-              <Button onClick={() => setAddOpen(true)} className="gap-2">
-                <UserPlus className="h-4 w-4" />
-                {t('addTenant')}
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => {
+                  const headers = [t('tenantName'), t('phone'), t('nationalId'), t('unitNumber'), t('building'), t('annualRent'), t('status')];
+                  const rows = filtered.map(tn => [tn.fullName, tn.phone, tn.nationalId, tn.unitNumber, lang === 'ar' ? tn.buildingNameAr : tn.buildingName, String(tn.annualRent), tn.active ? t('active') : t('inactive')]);
+                  exportToCsv('tenants.csv', headers, rows);
+                }} className="gap-1.5">
+                  <Download className="h-4 w-4" />{t('exportCsv')}
+                </Button>
+                <Button onClick={() => setAddOpen(true)} className="gap-2">
+                  <UserPlus className="h-4 w-4" />
+                  {t('addTenant')}
+                </Button>
+              </div>
             </div>
 
             <div className="rounded-lg border border-border bg-card overflow-hidden">
