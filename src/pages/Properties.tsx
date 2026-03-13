@@ -46,6 +46,9 @@ const Properties = () => {
                 <Plus className="h-4 w-4" />
                 إضافة بناية جديدة
               </Button>
+              <Button variant="outline" size="sm" onClick={handleExportBuildings} className="gap-1.5">
+                <Download className="h-4 w-4" />{t('exportCsv')}
+              </Button>
             </div>
             
             <div className="flex items-center gap-2">
