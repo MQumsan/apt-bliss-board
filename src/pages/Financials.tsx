@@ -398,8 +398,8 @@ const Financials = () => {
                         <TableHead>{t('statement')}</TableHead>
                         <TableHead>{t('property')}</TableHead>
                         <TableHead>{t('unitNumber')}</TableHead>
-                        <TableHead className="text-end">{t('amount')}</TableHead>
-                      </TableRow>
+                         <TableHead className="text-end">{t('amount')}</TableHead>
+                         <TableHead className="w-12"></TableHead>
                     </TableHeader>
                     <TableBody>
                       {expenses.length === 0 ? (
