@@ -400,6 +400,7 @@ const Financials = () => {
                         <TableHead>{t('unitNumber')}</TableHead>
                          <TableHead className="text-end">{t('amount')}</TableHead>
                          <TableHead className="w-12"></TableHead>
+                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {expenses.length === 0 ? (
