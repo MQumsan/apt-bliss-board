@@ -416,6 +416,11 @@ const Financials = () => {
                           <TableCell>{lang === 'ar' ? rec.buildingNameAr : rec.buildingName}</TableCell>
                           <TableCell>{rec.unitNumber}</TableCell>
                           <TableCell className="text-end font-bold text-status-occupied whitespace-nowrap">{formatCurrency(rec.amount, lang)}</TableCell>
+                          <TableCell>
+                            <button onClick={() => printExpenseVoucher(rec, lang)} className="p-2 rounded-lg hover:bg-status-occupied/10 text-status-occupied transition-colors" title={lang === 'ar' ? 'طباعة سند صرف' : 'Print Voucher'}>
+                              <Printer className="h-4 w-4" />
+                            </button>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
