@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { Languages, Plus, LogOut } from 'lucide-react';
+import { Languages, Plus, LogOut, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { BuildingTabs } from '@/components/BuildingTabs';
 import { useI18n } from '@/lib/i18n';
+import { useBuildings } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { AddBuildingDialog } from '@/components/AddBuildingDialog';
+import { exportToCsv } from '@/lib/exportCsv';
 
 const Properties = () => {
   const { t, toggleLang } = useI18n();
