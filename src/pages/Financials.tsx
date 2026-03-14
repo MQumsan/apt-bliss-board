@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, Printer, Plus, Languages, Percent, BarChart3, Download } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { exportToCsv } from '@/lib/exportCsv';
 import { formatCurrency, CURRENCY } from '@/lib/currency';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
+import { PageLayout } from '@/components/PageLayout';
 import { useI18n } from '@/lib/i18n';
 import { useFinance, useTenants, IncomeRecord, PaymentMethod, IncomeCategory, ExpenseCategory } from '@/lib/store';
 import { buildings } from '@/lib/data';
@@ -179,6 +179,11 @@ const Financials = () => {
   const { tenants } = useTenants();
   const [addIncomeOpen, setAddIncomeOpen] = useState(false);
   const [addExpenseOpen, setAddExpenseOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('addExpense') === '1') setAddExpenseOpen(true);
+  }, [searchParams]);
 
   const [incForm, setIncForm] = useState({ date: '', tenantId: '', amount: '', method: '', category: '', statement: '' });
   const [expForm, setExpForm] = useState({ date: '', category: '', amount: '', buildingId: '', unitNumber: '', statement: '' });
@@ -251,21 +256,7 @@ const Financials = () => {
   const categoryLabel = (c: string) => t(c as 'rent' | 'deposit' | 'maintenance' | 'utilities' | 'commission' | 'other');
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar />
-        <div className="flex-1 flex flex-col">
-          <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger />
-              <h2 className="text-lg font-semibold text-foreground">{t('financials')}</h2>
-            </div>
-            <Button variant="ghost" size="sm" onClick={toggleLang} className="gap-2">
-              <Languages className="h-4 w-4" />
-              {t('language')}
-            </Button>
-          </header>
-          <main className="flex-1 p-6">
+    <PageLayout>
             {/* KPI Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <div className="bg-card rounded-lg border-2 border-status-available/30 p-4 flex items-center gap-4">
@@ -495,9 +486,6 @@ const Financials = () => {
                 </div>
               </TabsContent>
             </Tabs>
-          </main>
-        </div>
-      </div>
 
       {/* Add Income Dialog */}
       <Dialog open={addIncomeOpen} onOpenChange={setAddIncomeOpen}>
@@ -632,7 +620,7 @@ const Financials = () => {
           </form>
         </DialogContent>
       </Dialog>
-    </SidebarProvider>
+    </PageLayout>
   );
 };
 
