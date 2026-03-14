@@ -486,9 +486,6 @@ const Financials = () => {
                 </div>
               </TabsContent>
             </Tabs>
-          </main>
-        </div>
-      </div>
 
       {/* Add Income Dialog */}
       <Dialog open={addIncomeOpen} onOpenChange={setAddIncomeOpen}>
