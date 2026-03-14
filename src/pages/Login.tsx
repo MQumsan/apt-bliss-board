@@ -103,7 +103,7 @@ const Login = () => {
                 <input type="checkbox" className="rounded border-input" />
                 {isAr ? 'تذكرني' : 'Remember me'}
               </label>
-              <a href="#" className="text-primary hover:underline">
+              <a href="/forgot-password" className="text-primary hover:underline">
                 {isAr ? 'نسيت كلمة المرور؟' : 'Forgot password?'}
               </a>
             </div>

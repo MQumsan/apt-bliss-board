@@ -620,7 +620,7 @@ const Financials = () => {
           </form>
         </DialogContent>
       </Dialog>
-    </SidebarProvider>
+    </PageLayout>
   );
 };
 
