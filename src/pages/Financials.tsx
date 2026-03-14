@@ -179,6 +179,11 @@ const Financials = () => {
   const { tenants } = useTenants();
   const [addIncomeOpen, setAddIncomeOpen] = useState(false);
   const [addExpenseOpen, setAddExpenseOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('addExpense') === '1') setAddExpenseOpen(true);
+  }, [searchParams]);
 
   const [incForm, setIncForm] = useState({ date: '', tenantId: '', amount: '', method: '', category: '', statement: '' });
   const [expForm, setExpForm] = useState({ date: '', category: '', amount: '', buildingId: '', unitNumber: '', statement: '' });
