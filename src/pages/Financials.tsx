@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { DollarSign, TrendingUp, TrendingDown, Printer, Plus, Languages, Percent, BarChart3, Download } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { exportToCsv } from '@/lib/exportCsv';
 import { formatCurrency, CURRENCY } from '@/lib/currency';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/AppSidebar';
+import { PageLayout } from '@/components/PageLayout';
 import { useI18n } from '@/lib/i18n';
 import { useFinance, useTenants, IncomeRecord, PaymentMethod, IncomeCategory, ExpenseCategory } from '@/lib/store';
 import { buildings } from '@/lib/data';
