@@ -256,21 +256,7 @@ const Financials = () => {
   const categoryLabel = (c: string) => t(c as 'rent' | 'deposit' | 'maintenance' | 'utilities' | 'commission' | 'other');
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar />
-        <div className="flex-1 flex flex-col">
-          <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger />
-              <h2 className="text-lg font-semibold text-foreground">{t('financials')}</h2>
-            </div>
-            <Button variant="ghost" size="sm" onClick={toggleLang} className="gap-2">
-              <Languages className="h-4 w-4" />
-              {t('language')}
-            </Button>
-          </header>
-          <main className="flex-1 p-6">
+    <PageLayout>
             {/* KPI Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <div className="bg-card rounded-lg border-2 border-status-available/30 p-4 flex items-center gap-4">
