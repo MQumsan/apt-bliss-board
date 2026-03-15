@@ -13,8 +13,10 @@ export interface Contract {
   buildingNameAr: string;
   startDate: string;
   endDate: string;
+  monthlyRent: number;
   annualRent: number;
   paymentFrequency: PaymentFrequency;
+  contractFile?: string; // URL or reference to uploaded file
 }
 
 function generateInitialContracts(): Contract[] {
@@ -23,11 +25,11 @@ function generateInitialContracts(): Contract[] {
   const later = new Date(now + 180 * 86400000).toISOString().split('T')[0];
   const past = new Date(now - 180 * 86400000).toISOString().split('T')[0];
   return [
-    { id: 'ctr-1', tenantId: 't-u2', tenantName: 'Ahmed Al-Farsi', unitId: 'u2', unitNumber: '102', buildingName: 'Al-Noor Tower', buildingNameAr: 'برج النور', startDate: past, endDate: later, annualRent: 54000, paymentFrequency: 'monthly' },
-    { id: 'ctr-2', tenantId: 't-u4', tenantName: 'Sara Mohammed', unitId: 'u4', unitNumber: '201', buildingName: 'Al-Noor Tower', buildingNameAr: 'برج النور', startDate: past, endDate: soon, annualRent: 42000, paymentFrequency: 'quarterly' },
-    { id: 'ctr-3', tenantId: 't-u6', tenantName: 'Khalid Ibrahim', unitId: 'u6', unitNumber: '203', buildingName: 'Al-Noor Tower', buildingNameAr: 'برج النور', startDate: past, endDate: later, annualRent: 72000, paymentFrequency: 'semi-annual' },
-    { id: 'ctr-4', tenantId: 't-u9', tenantName: 'Omar Youssef', unitId: 'u9', unitNumber: '101', buildingName: 'Al-Salam Residence', buildingNameAr: 'سكن السلام', startDate: past, endDate: later, annualRent: 60000, paymentFrequency: 'annual' },
-    { id: 'ctr-5', tenantId: 't-u12', tenantName: 'Layla Nasser', unitId: 'u12', unitNumber: '201', buildingName: 'Al-Salam Residence', buildingNameAr: 'سكن السلام', startDate: past, endDate: soon, annualRent: 48000, paymentFrequency: 'monthly' },
+    { id: 'ctr-1', tenantId: 't-u2', tenantName: 'Ahmed Al-Farsi', unitId: 'u2', unitNumber: '102', buildingName: 'Al-Noor Tower', buildingNameAr: 'برج النور', startDate: past, endDate: later, monthlyRent: 4500, annualRent: 54000, paymentFrequency: 'monthly' },
+    { id: 'ctr-2', tenantId: 't-u4', tenantName: 'Sara Mohammed', unitId: 'u4', unitNumber: '201', buildingName: 'Al-Noor Tower', buildingNameAr: 'برج النور', startDate: past, endDate: soon, monthlyRent: 3500, annualRent: 42000, paymentFrequency: 'quarterly' },
+    { id: 'ctr-3', tenantId: 't-u6', tenantName: 'Khalid Ibrahim', unitId: 'u6', unitNumber: '203', buildingName: 'Al-Noor Tower', buildingNameAr: 'برج النور', startDate: past, endDate: later, monthlyRent: 6000, annualRent: 72000, paymentFrequency: 'semi-annual' },
+    { id: 'ctr-4', tenantId: 't-u9', tenantName: 'Omar Youssef', unitId: 'u9', unitNumber: '101', buildingName: 'Al-Salam Residence', buildingNameAr: 'سكن السلام', startDate: past, endDate: later, monthlyRent: 5000, annualRent: 60000, paymentFrequency: 'annual' },
+    { id: 'ctr-5', tenantId: 't-u12', tenantName: 'Layla Nasser', unitId: 'u12', unitNumber: '201', buildingName: 'Al-Salam Residence', buildingNameAr: 'سكن السلام', startDate: past, endDate: soon, monthlyRent: 4000, annualRent: 48000, paymentFrequency: 'monthly' },
   ];
 }
 
@@ -56,6 +58,22 @@ export function useContracts() {
     return newContract;
   }, []);
 
+  const editContract = useCallback((id: string, updates: Partial<Contract>) => {
+    globalContracts = globalContracts.map(c => c.id === id ? { ...c, ...updates } : c);
+    notifyContracts();
+    if (api.isConfigured()) {
+      api.request(`/contracts/${id}`, { method: 'PUT', body: JSON.stringify(updates) }).catch(console.error);
+    }
+  }, []);
+
+  const deleteContract = useCallback((id: string) => {
+    globalContracts = globalContracts.filter(c => c.id !== id);
+    notifyContracts();
+    if (api.isConfigured()) {
+      api.request(`/contracts/${id}`, { method: 'DELETE' }).catch(console.error);
+    }
+  }, []);
+
   const getExpiringContracts = useCallback((days: number = 30) => {
     const now = Date.now();
     const limit = now + days * 86400000;
@@ -65,5 +83,5 @@ export function useContracts() {
     });
   }, []);
 
-  return { contracts: globalContracts, addContract, getExpiringContracts };
+  return { contracts: globalContracts, addContract, editContract, deleteContract, getExpiringContracts };
 }

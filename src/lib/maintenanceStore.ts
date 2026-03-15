@@ -48,6 +48,22 @@ export function useMaintenance() {
     return newRecord;
   }, []);
 
+  const editRecord = useCallback((id: string, updates: Partial<MaintenanceRecord>) => {
+    globalMaintenance = globalMaintenance.map(r => r.id === id ? { ...r, ...updates } : r);
+    notifyMaintenance();
+    if (api.isConfigured()) {
+      api.request(`/maintenance/${id}`, { method: 'PUT', body: JSON.stringify(updates) }).catch(console.error);
+    }
+  }, []);
+
+  const deleteRecord = useCallback((id: string) => {
+    globalMaintenance = globalMaintenance.filter(r => r.id !== id);
+    notifyMaintenance();
+    if (api.isConfigured()) {
+      api.request(`/maintenance/${id}`, { method: 'DELETE' }).catch(console.error);
+    }
+  }, []);
+
   const updateStatus = useCallback((id: string, status: MaintenanceStatus) => {
     globalMaintenance = globalMaintenance.map(r => r.id === id ? { ...r, status } : r);
     notifyMaintenance();
@@ -58,5 +74,5 @@ export function useMaintenance() {
 
   const totalMaintenanceCost = globalMaintenance.reduce((s, r) => s + r.cost, 0);
 
-  return { records: globalMaintenance, addRecord, updateStatus, totalMaintenanceCost };
+  return { records: globalMaintenance, addRecord, editRecord, deleteRecord, updateStatus, totalMaintenanceCost };
 }

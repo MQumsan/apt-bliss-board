@@ -1,33 +1,39 @@
 import { useState, useMemo } from 'react';
-import { Wrench, Plus, CheckCircle, Clock, Download } from 'lucide-react';
+import { Wrench, Plus, CheckCircle, Clock, Download, Pen, Trash2 } from 'lucide-react';
 import { formatCurrency, CURRENCY } from '@/lib/currency';
 import { PageLayout } from '@/components/PageLayout';
 import { useI18n } from '@/lib/i18n';
-import { useMaintenance } from '@/lib/maintenanceStore';
+import { useMaintenance, MaintenanceRecord } from '@/lib/maintenanceStore';
 import { useBuildings } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { exportToCsv } from '@/lib/exportCsv';
+import { DeleteConfirmDialog } from '@/components/DeleteConfirmDialog';
 
 const MaintenancePage = () => {
   const { t, lang } = useI18n();
   const isAr = lang === 'ar';
-  const { records, addRecord, updateStatus, totalMaintenanceCost } = useMaintenance();
+  const { records, addRecord, editRecord, deleteRecord, updateStatus, totalMaintenanceCost } = useMaintenance();
   const { buildings } = useBuildings();
   const [addOpen, setAddOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState('');
   const [form, setForm] = useState({ buildingId: '', unitNumber: '', issueDescription: '', cost: '', date: '', status: 'pending' as string });
 
   const buildingUnits = useMemo(() => {
     if (!form.buildingId) return [];
     return buildings.find(b => b.id === form.buildingId)?.units || [];
   }, [form.buildingId, buildings]);
+
+  const resetForm = () => setForm({ buildingId: '', unitNumber: '', issueDescription: '', cost: '', date: '', status: 'pending' });
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,8 +43,28 @@ const MaintenancePage = () => {
     const building = buildings.find(b => b.id === form.buildingId);
     addRecord({ buildingId: form.buildingId, buildingName: building?.name || '', buildingNameAr: building?.nameAr || '', unitNumber: form.unitNumber, issueDescription: form.issueDescription.trim(), cost: Number(form.cost), date: form.date, status: form.status as 'pending' | 'completed' });
     toast({ title: isAr ? 'تمت إضافة طلب الصيانة' : 'Maintenance record added' });
-    setForm({ buildingId: '', unitNumber: '', issueDescription: '', cost: '', date: '', status: 'pending' });
+    resetForm();
     setAddOpen(false);
+  };
+
+  const openEdit = (r: MaintenanceRecord) => {
+    setSelectedId(r.id);
+    setForm({ buildingId: r.buildingId, unitNumber: r.unitNumber, issueDescription: r.issueDescription, cost: String(r.cost), date: r.date, status: r.status });
+    setEditOpen(true);
+  };
+
+  const handleEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const building = buildings.find(b => b.id === form.buildingId);
+    editRecord(selectedId, { buildingId: form.buildingId, buildingName: building?.name || '', buildingNameAr: building?.nameAr || '', unitNumber: form.unitNumber, issueDescription: form.issueDescription.trim(), cost: Number(form.cost), date: form.date, status: form.status as 'pending' | 'completed' });
+    toast({ title: isAr ? 'تم تحديث طلب الصيانة' : 'Maintenance record updated' });
+    setEditOpen(false);
+  };
+
+  const handleDelete = () => {
+    deleteRecord(selectedId);
+    toast({ title: isAr ? 'تم حذف طلب الصيانة' : 'Maintenance record deleted' });
+    setDeleteOpen(false);
   };
 
   const handleExport = () => {
@@ -46,6 +72,30 @@ const MaintenancePage = () => {
     const rows = records.map(r => [r.date, isAr ? r.buildingNameAr : r.buildingName, r.unitNumber, r.issueDescription, String(r.cost), r.status === 'pending' ? (isAr ? 'قيد الانتظار' : 'Pending') : (isAr ? 'مكتمل' : 'Completed')]);
     exportToCsv('maintenance.csv', headers, rows);
   };
+
+  const renderMaintenanceForm = (onSubmit: (e: React.FormEvent) => void, submitLabel: string) => (
+    <form onSubmit={onSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-1.5"><Label>{t('date')} *</Label><Input type="date" value={form.date} onChange={e => setForm(p => ({...p, date: e.target.value}))} /></div>
+        <div className="space-y-1.5"><Label>{t('property')} *</Label>
+          <Select value={form.buildingId} onValueChange={v => setForm(p => ({...p, buildingId: v, unitNumber: ''}))}><SelectTrigger><SelectValue placeholder={t('selectProperty')} /></SelectTrigger>
+            <SelectContent>{buildings.map(b => <SelectItem key={b.id} value={b.id}>{isAr ? b.nameAr : b.name}</SelectItem>)}</SelectContent></Select>
+        </div>
+        <div className="space-y-1.5"><Label>{t('unitNumber')} *</Label>
+          <Select value={form.unitNumber} onValueChange={v => setForm(p => ({...p, unitNumber: v}))}><SelectTrigger><SelectValue placeholder={t('selectUnit')} /></SelectTrigger>
+            <SelectContent>{buildingUnits.map(u => <SelectItem key={u.id} value={u.unitNumber}>{t('unitNumber')} {u.unitNumber}</SelectItem>)}</SelectContent></Select>
+        </div>
+        <div className="space-y-1.5"><Label>{isAr ? 'التكلفة' : 'Cost'} ({CURRENCY}) *</Label><Input type="number" min="0" value={form.cost} onChange={e => setForm(p => ({...p, cost: e.target.value}))} dir="ltr" /></div>
+      </div>
+      <div className="space-y-1.5"><Label>{isAr ? 'وصف المشكلة' : 'Issue Description'} *</Label>
+        <Textarea value={form.issueDescription} onChange={e => setForm(p => ({...p, issueDescription: e.target.value}))} rows={3} placeholder={isAr ? 'وصف تفصيلي للمشكلة...' : 'Detailed description...'} className="resize-none" />
+      </div>
+      <DialogFooter className="gap-2 pt-2">
+        <Button type="button" variant="outline" onClick={() => { setAddOpen(false); setEditOpen(false); }}>{t('cancel')}</Button>
+        <Button type="submit" className="bg-status-maintenance hover:bg-status-maintenance/90 text-status-maintenance-foreground">{submitLabel}</Button>
+      </DialogFooter>
+    </form>
+  );
 
   return (
     <PageLayout>
@@ -68,7 +118,7 @@ const MaintenancePage = () => {
         <div />
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleExport} className="gap-1.5"><Download className="h-4 w-4" />{t('exportCsv')}</Button>
-          <Button onClick={() => setAddOpen(true)} className="gap-2"><Plus className="h-4 w-4" />{isAr ? 'إضافة طلب صيانة' : 'Add Maintenance'}</Button>
+          <Button onClick={() => { resetForm(); setAddOpen(true); }} className="gap-2"><Plus className="h-4 w-4" />{isAr ? 'إضافة طلب صيانة' : 'Add Maintenance'}</Button>
         </div>
       </div>
 
@@ -78,7 +128,7 @@ const MaintenancePage = () => {
             <TableRow className="bg-muted/50">
               <TableHead>{t('date')}</TableHead><TableHead>{t('building')}</TableHead><TableHead>{t('unitNumber')}</TableHead>
               <TableHead>{isAr ? 'الوصف' : 'Description'}</TableHead><TableHead className="text-end">{isAr ? 'التكلفة' : 'Cost'}</TableHead>
-              <TableHead>{t('status')}</TableHead><TableHead className="w-20"></TableHead>
+              <TableHead>{t('status')}</TableHead><TableHead className="w-32">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -96,11 +146,19 @@ const MaintenancePage = () => {
                   : <Badge className="bg-status-available/10 text-status-available border-status-available/20">{isAr ? 'مكتمل' : 'Completed'}</Badge>}
                 </TableCell>
                 <TableCell>
-                  {r.status === 'pending' && (
-                    <Button size="sm" variant="outline" className="gap-1 text-status-available" onClick={() => { updateStatus(r.id, 'completed'); toast({ title: isAr ? 'تم تحديث الحالة' : 'Status updated' }); }}>
-                      <CheckCircle className="h-3.5 w-3.5" />{isAr ? 'إكمال' : 'Complete'}
+                  <div className="flex items-center gap-1">
+                    {r.status === 'pending' && (
+                      <Button size="sm" variant="outline" className="h-7 text-xs gap-1 text-status-available" onClick={() => { updateStatus(r.id, 'completed'); toast({ title: isAr ? 'تم تحديث الحالة' : 'Status updated' }); }}>
+                        <CheckCircle className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => openEdit(r)}>
+                      <Pen className="h-4 w-4" />
                     </Button>
-                  )}
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => { setSelectedId(r.id); setDeleteOpen(true); }}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -111,29 +169,18 @@ const MaintenancePage = () => {
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle className="flex items-center gap-2"><Wrench className="h-5 w-5 text-status-maintenance" />{isAr ? 'إضافة طلب صيانة' : 'Add Maintenance Record'}</DialogTitle></DialogHeader>
-          <form onSubmit={handleAdd} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5"><Label>{t('date')} *</Label><Input type="date" value={form.date} onChange={e => setForm(p => ({...p, date: e.target.value}))} /></div>
-              <div className="space-y-1.5"><Label>{t('property')} *</Label>
-                <Select value={form.buildingId} onValueChange={v => setForm(p => ({...p, buildingId: v, unitNumber: ''}))}><SelectTrigger><SelectValue placeholder={t('selectProperty')} /></SelectTrigger>
-                  <SelectContent>{buildings.map(b => <SelectItem key={b.id} value={b.id}>{isAr ? b.nameAr : b.name}</SelectItem>)}</SelectContent></Select>
-              </div>
-              <div className="space-y-1.5"><Label>{t('unitNumber')} *</Label>
-                <Select value={form.unitNumber} onValueChange={v => setForm(p => ({...p, unitNumber: v}))}><SelectTrigger><SelectValue placeholder={t('selectUnit')} /></SelectTrigger>
-                  <SelectContent>{buildingUnits.map(u => <SelectItem key={u.id} value={u.unitNumber}>{t('unitNumber')} {u.unitNumber}</SelectItem>)}</SelectContent></Select>
-              </div>
-              <div className="space-y-1.5"><Label>{isAr ? 'التكلفة' : 'Cost'} ({CURRENCY}) *</Label><Input type="number" min="0" value={form.cost} onChange={e => setForm(p => ({...p, cost: e.target.value}))} dir="ltr" /></div>
-            </div>
-            <div className="space-y-1.5"><Label>{isAr ? 'وصف المشكلة' : 'Issue Description'} *</Label>
-              <Textarea value={form.issueDescription} onChange={e => setForm(p => ({...p, issueDescription: e.target.value}))} rows={3} placeholder={isAr ? 'وصف تفصيلي للمشكلة...' : 'Detailed description...'} className="resize-none" />
-            </div>
-            <div className="flex justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>{t('cancel')}</Button>
-              <Button type="submit" className="bg-status-maintenance hover:bg-status-maintenance/90 text-status-maintenance-foreground">{isAr ? 'إضافة' : 'Add'}</Button>
-            </div>
-          </form>
+          {renderMaintenanceForm(handleAdd, isAr ? 'إضافة' : 'Add')}
         </DialogContent>
       </Dialog>
+
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Wrench className="h-5 w-5 text-status-maintenance" />{isAr ? 'تعديل طلب الصيانة' : 'Edit Maintenance Record'}</DialogTitle></DialogHeader>
+          {renderMaintenanceForm(handleEdit, t('save'))}
+        </DialogContent>
+      </Dialog>
+
+      <DeleteConfirmDialog open={deleteOpen} onOpenChange={setDeleteOpen} onConfirm={handleDelete} />
     </PageLayout>
   );
 };

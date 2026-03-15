@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import { api } from './api';
 
 export type ChequeStatus = 'pending' | 'cleared' | 'bounced' | 'cancelled';
 
@@ -36,7 +37,6 @@ function notifyCheques() {
   chequeListeners.forEach(fn => fn());
 }
 
-// Callback for when a cheque is cleared — set by the store integration
 let onChequeCleared: ((cheque: Cheque) => void) | null = null;
 
 export function setOnChequeCleared(cb: (cheque: Cheque) => void) {
@@ -52,17 +52,39 @@ export function useCheques() {
   }, []);
 
   const addCheque = useCallback((cheque: Omit<Cheque, 'id'>) => {
-    globalCheques = [...globalCheques, { ...cheque, id: `chq-${Date.now()}` }];
+    const newCheque = { ...cheque, id: `chq-${Date.now()}` };
+    globalCheques = [...globalCheques, newCheque];
     notifyCheques();
+    if (api.isConfigured()) {
+      api.createCheque(newCheque).catch(console.error);
+    }
+  }, []);
+
+  const editCheque = useCallback((id: string, updates: Partial<Cheque>) => {
+    globalCheques = globalCheques.map(c => c.id === id ? { ...c, ...updates } : c);
+    notifyCheques();
+    if (api.isConfigured()) {
+      api.request(`/cheques/${id}`, { method: 'PUT', body: JSON.stringify(updates) }).catch(console.error);
+    }
+  }, []);
+
+  const deleteCheque = useCallback((id: string) => {
+    globalCheques = globalCheques.filter(c => c.id !== id);
+    notifyCheques();
+    if (api.isConfigured()) {
+      api.request(`/cheques/${id}`, { method: 'DELETE' }).catch(console.error);
+    }
   }, []);
 
   const updateStatus = useCallback((id: string, status: ChequeStatus) => {
     const cheque = globalCheques.find(c => c.id === id);
     globalCheques = globalCheques.map(c => c.id === id ? { ...c, status } : c);
     notifyCheques();
-    // Auto-create income when cheque is cleared
     if (status === 'cleared' && cheque && onChequeCleared) {
       onChequeCleared({ ...cheque, status });
+    }
+    if (api.isConfigured()) {
+      api.updateChequeStatus(id, status).catch(console.error);
     }
   }, []);
 
@@ -82,5 +104,5 @@ export function useCheques() {
     return globalCheques.filter(c => c.status === 'bounced');
   }, []);
 
-  return { cheques: globalCheques, addCheque, updateStatus, getUpcomingCheques, getOverduePendingCheques, getBouncedCheques };
+  return { cheques: globalCheques, addCheque, editCheque, deleteCheque, updateStatus, getUpcomingCheques, getOverduePendingCheques, getBouncedCheques };
 }
