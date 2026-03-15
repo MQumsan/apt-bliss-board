@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import Index from "./pages/Index";
 import UnitsMonitor from "./pages/UnitsMonitor";
+import Buildings from "./pages/Buildings";
 import Tenants from "./pages/Tenants";
 import Financials from "./pages/Financials";
 import Cheques from "./pages/Cheques";
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/units-monitor" element={<UnitsMonitor />} />
             <Route path="/properties" element={<UnitsMonitor />} />
+            <Route path="/buildings" element={<Buildings />} />
             <Route path="/tenants" element={<Tenants />} />
             <Route path="/financials" element={<Financials />} />
             <Route path="/cheques" element={<Cheques />} />

@@ -48,11 +48,13 @@ export function useBuildings() {
     }
   }, []);
 
-  const addBuilding = useCallback((name: string, nameAr: string) => {
+  const addBuilding = useCallback((name: string, nameAr: string, address?: string, floors?: number) => {
     const newBuilding: Building = {
       id: `b-${Date.now()}`,
       name,
       nameAr,
+      address: address || '',
+      floors: floors || 1,
       units: [],
     };
     globalBuildings = [...globalBuildings, newBuilding];
@@ -61,6 +63,22 @@ export function useBuildings() {
       api.createBuilding({ name, nameAr }).catch(console.error);
     }
     return newBuilding;
+  }, []);
+
+  const editBuilding = useCallback((id: string, updates: Partial<Pick<Building, 'name' | 'nameAr' | 'address' | 'floors'>>) => {
+    globalBuildings = globalBuildings.map(b => b.id === id ? { ...b, ...updates } : b);
+    notify();
+    if (api.isConfigured()) {
+      api.request(`/buildings/${id}`, { method: 'PUT', body: JSON.stringify(updates) }).catch(console.error);
+    }
+  }, []);
+
+  const deleteBuilding = useCallback((id: string) => {
+    globalBuildings = globalBuildings.filter(b => b.id !== id);
+    notify();
+    if (api.isConfigured()) {
+      api.request(`/buildings/${id}`, { method: 'DELETE' }).catch(console.error);
+    }
   }, []);
 
   const addUnit = useCallback((buildingId: string, unit: Omit<Unit, 'id'>) => {
@@ -75,6 +93,17 @@ export function useBuildings() {
     return newUnit;
   }, []);
 
+  const deleteUnit = useCallback((unitId: string) => {
+    globalBuildings = globalBuildings.map(b => ({
+      ...b,
+      units: b.units.filter(u => u.id !== unitId),
+    }));
+    notify();
+    if (api.isConfigured()) {
+      api.request(`/units/${unitId}`, { method: 'DELETE' }).catch(console.error);
+    }
+  }, []);
+
   const getAvailableUnits = useCallback(() => {
     const result: (Unit & { buildingName: string; buildingNameAr: string })[] = [];
     globalBuildings.forEach(b => {
@@ -87,7 +116,7 @@ export function useBuildings() {
     return result;
   }, []);
 
-  return { buildings: globalBuildings, assignUnit, updateUnit, addBuilding, addUnit, getAvailableUnits };
+  return { buildings: globalBuildings, assignUnit, updateUnit, addBuilding, editBuilding, deleteBuilding, addUnit, deleteUnit, getAvailableUnits };
 }
 
 export interface Tenant {
@@ -157,7 +186,23 @@ export function useTenants() {
     return newTenant;
   }, []);
 
-  return { tenants: globalTenants, addTenant };
+  const editTenant = useCallback((id: string, updates: Partial<Tenant>) => {
+    globalTenants = globalTenants.map(t => t.id === id ? { ...t, ...updates } : t);
+    notifyTenants();
+    if (api.isConfigured()) {
+      api.request(`/tenants/${id}`, { method: 'PUT', body: JSON.stringify(updates) }).catch(console.error);
+    }
+  }, []);
+
+  const deleteTenant = useCallback((id: string) => {
+    globalTenants = globalTenants.filter(t => t.id !== id);
+    notifyTenants();
+    if (api.isConfigured()) {
+      api.request(`/tenants/${id}`, { method: 'DELETE' }).catch(console.error);
+    }
+  }, []);
+
+  return { tenants: globalTenants, addTenant, editTenant, deleteTenant };
 }
 
 // ─── Financial Records ───
@@ -261,8 +306,40 @@ export function useFinance() {
     }
   }, []);
 
+  const editIncome = useCallback((id: string, updates: Partial<IncomeRecord>) => {
+    globalIncomes = globalIncomes.map(r => r.id === id ? { ...r, ...updates } : r);
+    notifyFinance();
+    if (api.isConfigured()) {
+      api.request(`/incomes/${id}`, { method: 'PUT', body: JSON.stringify(updates) }).catch(console.error);
+    }
+  }, []);
+
+  const deleteIncome = useCallback((id: string) => {
+    globalIncomes = globalIncomes.filter(r => r.id !== id);
+    notifyFinance();
+    if (api.isConfigured()) {
+      api.request(`/incomes/${id}`, { method: 'DELETE' }).catch(console.error);
+    }
+  }, []);
+
+  const editExpense = useCallback((id: string, updates: Partial<ExpenseRecord>) => {
+    globalExpenses = globalExpenses.map(r => r.id === id ? { ...r, ...updates } : r);
+    notifyFinance();
+    if (api.isConfigured()) {
+      api.request(`/expenses/${id}`, { method: 'PUT', body: JSON.stringify(updates) }).catch(console.error);
+    }
+  }, []);
+
+  const deleteExpense = useCallback((id: string) => {
+    globalExpenses = globalExpenses.filter(r => r.id !== id);
+    notifyFinance();
+    if (api.isConfigured()) {
+      api.request(`/expenses/${id}`, { method: 'DELETE' }).catch(console.error);
+    }
+  }, []);
+
   const totalRevenue = globalIncomes.reduce((s, r) => s + r.amount, 0);
   const totalExpenses = globalExpenses.reduce((s, r) => s + r.amount, 0);
 
-  return { incomes: globalIncomes, expenses: globalExpenses, addIncome, addExpense, totalRevenue, totalExpenses };
+  return { incomes: globalIncomes, expenses: globalExpenses, addIncome, addExpense, editIncome, deleteIncome, editExpense, deleteExpense, totalRevenue, totalExpenses };
 }

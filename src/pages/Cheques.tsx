@@ -1,19 +1,20 @@
 import { useState, useEffect } from 'react';
-import { Plus, FileCheck, Download, AlertTriangle, Ban } from 'lucide-react';
+import { Plus, FileCheck, Download, AlertTriangle, Ban, Pen, Trash2 } from 'lucide-react';
 import { PageLayout } from '@/components/PageLayout';
 import { useI18n } from '@/lib/i18n';
-import { useCheques, ChequeStatus, setOnChequeCleared } from '@/lib/chequeStore';
+import { useCheques, ChequeStatus, Cheque, setOnChequeCleared } from '@/lib/chequeStore';
 import { useTenants, useFinance } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { exportToCsv } from '@/lib/exportCsv';
+import { DeleteConfirmDialog } from '@/components/DeleteConfirmDialog';
 
 const statusColors: Record<ChequeStatus, string> = {
   pending: 'bg-status-maintenance/10 text-status-maintenance border-status-maintenance/20',
@@ -24,10 +25,14 @@ const statusColors: Record<ChequeStatus, string> = {
 
 const Cheques = () => {
   const { t, lang } = useI18n();
-  const { cheques, addCheque, updateStatus, getBouncedCheques } = useCheques();
+  const isAr = lang === 'ar';
+  const { cheques, addCheque, editCheque, deleteCheque, updateStatus, getBouncedCheques } = useCheques();
   const { tenants } = useTenants();
   const { addIncome } = useFinance();
   const [addOpen, setAddOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState('');
   const [form, setForm] = useState({ chequeNumber: '', bankName: '', dueDate: '', amount: '', tenantId: '', status: 'pending' as ChequeStatus });
 
   useEffect(() => {
@@ -47,6 +52,8 @@ const Cheques = () => {
     });
   }, [addIncome]);
 
+  const resetForm = () => setForm({ chequeNumber: '', bankName: '', dueDate: '', amount: '', tenantId: '', status: 'pending' });
+
   const handleClear = (id: string) => {
     updateStatus(id, 'cleared');
     toast({ title: t('chequeCleared') });
@@ -55,8 +62,7 @@ const Cheques = () => {
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.chequeNumber || !form.bankName || !form.dueDate || !form.amount || !form.tenantId) {
-      toast({ title: t('fillRequired'), variant: 'destructive' });
-      return;
+      toast({ title: t('fillRequired'), variant: 'destructive' }); return;
     }
     const tenant = tenants.find(tn => tn.id === form.tenantId);
     if (!tenant) return;
@@ -65,8 +71,27 @@ const Cheques = () => {
       tenantId: tenant.id, tenantName: tenant.fullName, buildingName: tenant.buildingName, buildingNameAr: tenant.buildingNameAr, unitNumber: tenant.unitNumber, status: form.status,
     });
     toast({ title: t('chequeAdded') });
-    setForm({ chequeNumber: '', bankName: '', dueDate: '', amount: '', tenantId: '', status: 'pending' });
+    resetForm();
     setAddOpen(false);
+  };
+
+  const openEdit = (c: Cheque) => {
+    setSelectedId(c.id);
+    setForm({ chequeNumber: c.chequeNumber, bankName: c.bankName, dueDate: c.dueDate, amount: String(c.amount), tenantId: c.tenantId, status: c.status });
+    setEditOpen(true);
+  };
+
+  const handleEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    editCheque(selectedId, { chequeNumber: form.chequeNumber, bankName: form.bankName, dueDate: form.dueDate, amount: Number(form.amount) });
+    toast({ title: isAr ? 'تم تحديث الشيك' : 'Cheque updated' });
+    setEditOpen(false);
+  };
+
+  const handleDelete = () => {
+    deleteCheque(selectedId);
+    toast({ title: isAr ? 'تم حذف الشيك' : 'Cheque deleted' });
+    setDeleteOpen(false);
   };
 
   const handleExport = () => {
@@ -95,7 +120,7 @@ const Cheques = () => {
             <TableHead>{t('unitNumber')}</TableHead>
             <TableHead className="text-end">{t('amount')}</TableHead>
             <TableHead>{t('status')}</TableHead>
-            <TableHead></TableHead>
+            <TableHead className="w-36">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -118,13 +143,19 @@ const Cheques = () => {
                   {c.status === 'pending' && (
                     <>
                       <Button size="sm" variant="outline" className="h-7 text-xs gap-1 border-status-available/30 text-status-available hover:bg-status-available/10" onClick={() => handleClear(c.id)}>
-                        <FileCheck className="h-3.5 w-3.5" />{t('markAsCleared')}
+                        <FileCheck className="h-3.5 w-3.5" />
                       </Button>
                       <Button size="sm" variant="outline" className="h-7 text-xs gap-1 border-destructive/30 text-destructive hover:bg-destructive/10" onClick={() => updateStatus(c.id, 'bounced')}>
-                        <Ban className="h-3.5 w-3.5" />{t('bounced')}
+                        <Ban className="h-3.5 w-3.5" />
                       </Button>
                     </>
                   )}
+                  <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => openEdit(c)}>
+                    <Pen className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => { setSelectedId(c.id); setDeleteOpen(true); }}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
               </TableCell>
             </TableRow>
@@ -140,7 +171,7 @@ const Cheques = () => {
         <h3 className="text-sm font-semibold text-muted-foreground">{cheques.length} {t('cheques')}</h3>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleExport} className="gap-2"><Download className="h-4 w-4" />{t('exportCsv')}</Button>
-          <Button size="sm" onClick={() => setAddOpen(true)} className="gap-2"><Plus className="h-4 w-4" />{t('addCheque')}</Button>
+          <Button size="sm" onClick={() => { resetForm(); setAddOpen(true); }} className="gap-2"><Plus className="h-4 w-4" />{t('addCheque')}</Button>
         </div>
       </div>
 
@@ -156,12 +187,13 @@ const Cheques = () => {
         <TabsContent value="bounced">
           <div className="mb-3 flex items-center gap-2 p-3 rounded-lg bg-destructive/5 border border-destructive/15">
             <AlertTriangle className="h-4 w-4 text-destructive" />
-            <span className="text-sm font-medium text-destructive">{lang === 'ar' ? 'شيكات مرتجعة تحتاج متابعة فورية' : 'Bounced cheques requiring immediate follow-up'}</span>
+            <span className="text-sm font-medium text-destructive">{isAr ? 'شيكات مرتجعة تحتاج متابعة فورية' : 'Bounced cheques requiring immediate follow-up'}</span>
           </div>
           {renderTable(bouncedCheques)}
         </TabsContent>
       </Tabs>
 
+      {/* Add Cheque Dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader><DialogTitle className="flex items-center gap-2"><FileCheck className="h-5 w-5 text-primary" />{t('addCheque')}</DialogTitle></DialogHeader>
@@ -179,13 +211,34 @@ const Cheques = () => {
                 </Select>
               </div>
             </div>
-            <div className="flex justify-end gap-2 pt-2">
+            <DialogFooter className="gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>{t('cancel')}</Button>
               <Button type="submit">{t('addCheque')}</Button>
-            </div>
+            </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Cheque Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader><DialogTitle>{isAr ? 'تعديل الشيك' : 'Edit Cheque'}</DialogTitle></DialogHeader>
+          <form onSubmit={handleEdit} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5"><Label>{t('chequeNumber')}</Label><Input value={form.chequeNumber} onChange={e => setForm(p => ({...p, chequeNumber: e.target.value}))} /></div>
+              <div className="space-y-1.5"><Label>{t('bankName')}</Label><Input value={form.bankName} onChange={e => setForm(p => ({...p, bankName: e.target.value}))} /></div>
+              <div className="space-y-1.5"><Label>{t('dueDate')}</Label><Input type="date" value={form.dueDate} onChange={e => setForm(p => ({...p, dueDate: e.target.value}))} /></div>
+              <div className="space-y-1.5"><Label>{t('amount')} (OMR)</Label><Input type="number" min="0" value={form.amount} onChange={e => setForm(p => ({...p, amount: e.target.value}))} dir="ltr" /></div>
+            </div>
+            <DialogFooter className="gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={() => setEditOpen(false)}>{t('cancel')}</Button>
+              <Button type="submit">{t('save')}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <DeleteConfirmDialog open={deleteOpen} onOpenChange={setDeleteOpen} onConfirm={handleDelete} />
     </PageLayout>
   );
 };

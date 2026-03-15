@@ -1,22 +1,30 @@
-import { useState } from 'react';
-import { UserPlus, Search, Users, Download } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { UserPlus, Search, Users, Download, Pen, Trash2 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { exportToCsv } from '@/lib/exportCsv';
 import { PageLayout } from '@/components/PageLayout';
 import { useI18n } from '@/lib/i18n';
-import { useTenants } from '@/lib/store';
+import { useTenants, Tenant } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { AddTenantDialog } from '@/components/AddTenantDialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useEffect } from 'react';
+import { DeleteConfirmDialog } from '@/components/DeleteConfirmDialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { toast } from '@/hooks/use-toast';
 
 const Tenants = () => {
   const { t, lang } = useI18n();
-  const { tenants } = useTenants();
+  const isAr = lang === 'ar';
+  const { tenants, editTenant, deleteTenant } = useTenants();
   const [search, setSearch] = useState('');
   const [addOpen, setAddOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState('');
+  const [editForm, setEditForm] = useState({ fullName: '', phone: '', nationalId: '', email: '' });
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -28,6 +36,25 @@ const Tenants = () => {
     const q = search.toLowerCase();
     return tenant.fullName.toLowerCase().includes(q) || tenant.nationalId.toLowerCase().includes(q) || tenant.unitNumber.toLowerCase().includes(q) || tenant.phone.toLowerCase().includes(q);
   });
+
+  const openEdit = (tenant: Tenant) => {
+    setSelectedId(tenant.id);
+    setEditForm({ fullName: tenant.fullName, phone: tenant.phone, nationalId: tenant.nationalId, email: tenant.email });
+    setEditOpen(true);
+  };
+
+  const handleEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    editTenant(selectedId, editForm);
+    toast({ title: isAr ? 'تم تحديث المستأجر' : 'Tenant updated' });
+    setEditOpen(false);
+  };
+
+  const handleDelete = () => {
+    deleteTenant(selectedId);
+    toast({ title: isAr ? 'تم حذف المستأجر' : 'Tenant deleted' });
+    setDeleteOpen(false);
+  };
 
   return (
     <PageLayout>
@@ -61,12 +88,13 @@ const Tenants = () => {
               <TableHead>{t('building')}</TableHead>
               <TableHead>{t('annualRent')}</TableHead>
               <TableHead>{t('status')}</TableHead>
+              <TableHead className="w-24">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                   <Users className="h-8 w-8 mx-auto mb-2 opacity-40" />{t('noTenantsFound')}
                 </TableCell>
               </TableRow>
@@ -83,12 +111,42 @@ const Tenants = () => {
                     {tenant.active ? t('active') : t('inactive')}
                   </Badge>
                 </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1">
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => openEdit(tenant)}>
+                      <Pen className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => { setSelectedId(tenant.id); setDeleteOpen(true); }}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
+
       <AddTenantDialog open={addOpen} onOpenChange={setAddOpen} />
+
+      {/* Edit Tenant Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader><DialogTitle>{isAr ? 'تعديل المستأجر' : 'Edit Tenant'}</DialogTitle></DialogHeader>
+          <form onSubmit={handleEdit} className="space-y-4">
+            <div className="space-y-1.5"><Label>{t('fullName')}</Label><Input value={editForm.fullName} onChange={e => setEditForm(p => ({...p, fullName: e.target.value}))} /></div>
+            <div className="space-y-1.5"><Label>{t('phone')}</Label><Input value={editForm.phone} onChange={e => setEditForm(p => ({...p, phone: e.target.value}))} dir="ltr" /></div>
+            <div className="space-y-1.5"><Label>{t('nationalId')}</Label><Input value={editForm.nationalId} onChange={e => setEditForm(p => ({...p, nationalId: e.target.value}))} dir="ltr" /></div>
+            <div className="space-y-1.5"><Label>{t('email')}</Label><Input value={editForm.email} onChange={e => setEditForm(p => ({...p, email: e.target.value}))} dir="ltr" /></div>
+            <DialogFooter className="gap-2">
+              <Button type="button" variant="outline" onClick={() => setEditOpen(false)}>{t('cancel')}</Button>
+              <Button type="submit">{t('save')}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <DeleteConfirmDialog open={deleteOpen} onOpenChange={setDeleteOpen} onConfirm={handleDelete} />
     </PageLayout>
   );
 };

@@ -14,6 +14,8 @@ export interface Building {
   id: string;
   name: string;
   nameAr: string;
+  address?: string;
+  floors?: number;
   units: Unit[];
 }
 
@@ -26,6 +28,8 @@ export const buildings: Building[] = [
     id: 'b1',
     name: 'Al-Noor Tower',
     nameAr: 'برج النور',
+    address: 'Muscat, Oman',
+    floors: 3,
     units: [
       { id: 'u1', unitNumber: '101', floor: 1, type: 'studio', status: 'Available' },
       { id: 'u2', unitNumber: '102', floor: 1, type: 'oneBed', status: 'Occupied', tenantName: 'Ahmed Al-Farsi', contractEnd: later },
@@ -41,6 +45,8 @@ export const buildings: Building[] = [
     id: 'b2',
     name: 'Al-Salam Residence',
     nameAr: 'سكن السلام',
+    address: 'Muscat, Oman',
+    floors: 2,
     units: [
       { id: 'u9', unitNumber: '101', floor: 1, type: 'twoBed', status: 'Occupied', tenantName: 'Omar Youssef', contractEnd: later },
       { id: 'u10', unitNumber: '102', floor: 1, type: 'oneBed', status: 'Available' },
@@ -54,6 +60,8 @@ export const buildings: Building[] = [
     id: 'b3',
     name: 'Pearl Heights',
     nameAr: 'أبراج اللؤلؤ',
+    address: 'Muscat, Oman',
+    floors: 2,
     units: [
       { id: 'u15', unitNumber: '101', floor: 1, type: 'studio', status: 'Available' },
       { id: 'u16', unitNumber: '102', floor: 1, type: 'oneBed', status: 'Occupied', tenantName: 'Nadia Karim', contractEnd: later },
