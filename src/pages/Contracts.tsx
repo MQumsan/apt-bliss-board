@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileText, Plus, AlertTriangle, Download, Pen, Trash2, Upload } from 'lucide-react';
+import { FileText, Plus, AlertTriangle, Download, Pen, Trash2, Upload, Printer, Share2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/currency';
 import { PageLayout } from '@/components/PageLayout';
 import { useI18n } from '@/lib/i18n';
@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { toast } from '@/hooks/use-toast';
 import { exportToCsv } from '@/lib/exportCsv';
 import { DeleteConfirmDialog } from '@/components/DeleteConfirmDialog';
+import { printContract, shareContractWhatsApp } from '@/lib/receiptPdf';
 
 const Contracts = () => {
   const { t, lang } = useI18n();
@@ -152,7 +153,7 @@ const Contracts = () => {
               <TableHead>{t('contractStart')}</TableHead><TableHead>{t('contractEnd')}</TableHead>
               <TableHead>{isAr ? 'شهري' : 'Monthly'}</TableHead><TableHead>{t('annualRent')}</TableHead>
               <TableHead>{isAr ? 'تكرار الدفع' : 'Frequency'}</TableHead><TableHead>{t('status')}</TableHead>
-              <TableHead className="w-24">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
+              <TableHead className="w-32">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -167,6 +168,12 @@ const Contracts = () => {
                 <TableCell>{isExpiring(c.endDate) ? <Badge className="bg-status-expiring/10 text-status-expiring border-status-expiring/20">{t('expiringSoon')}</Badge> : <Badge variant="secondary" className="bg-status-available/10 text-status-available border-status-available/20">{t('active')}</Badge>}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => printContract(c, lang)} title={isAr ? 'طباعة العقد' : 'Print Contract'}>
+                      <Printer className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-status-available" onClick={() => shareContractWhatsApp(c, lang)} title="WhatsApp">
+                      <Share2 className="h-4 w-4" />
+                    </Button>
                     <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => openEdit(c)}>
                       <Pen className="h-4 w-4" />
                     </Button>

@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { DollarSign, TrendingUp, TrendingDown, Printer, Plus, Percent, BarChart3, Download, Pen, Trash2 } from 'lucide-react';
+import { DollarSign, TrendingUp, TrendingDown, Printer, Plus, Percent, BarChart3, Download, Pen, Trash2, Share2 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { exportToCsv } from '@/lib/exportCsv';
 import { formatCurrency, CURRENCY } from '@/lib/currency';
@@ -18,9 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { DeleteConfirmDialog } from '@/components/DeleteConfirmDialog';
-
-// Print receipt for income record
-function printReceipt(record: IncomeRecord, lang: 'en' | 'ar') {
+import { printReceipt, shareReceiptWhatsApp, printExpenseVoucher, shareExpenseWhatsApp } from '@/lib/receiptPdf';
   const isAr = lang === 'ar';
   const dir = isAr ? 'rtl' : 'ltr';
   const w = window.open('', '_blank', 'width=700,height=900');
