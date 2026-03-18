@@ -19,126 +19,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { DeleteConfirmDialog } from '@/components/DeleteConfirmDialog';
 import { printReceipt, shareReceiptWhatsApp, printExpenseVoucher, shareExpenseWhatsApp } from '@/lib/receiptPdf';
-  const isAr = lang === 'ar';
-  const dir = isAr ? 'rtl' : 'ltr';
-  const w = window.open('', '_blank', 'width=700,height=900');
-  if (!w) return;
-  w.document.write(`<!DOCTYPE html><html dir="${dir}" lang="${lang}">
-<head><meta charset="utf-8"><title>${isAr ? 'إيصال دفع' : 'Payment Receipt'}</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: ${isAr ? "'Noto Sans Arabic'" : "'Inter'"}, sans-serif; padding: 0; color: #1a1a2e; background: #f8fafc; }
-  .receipt { max-width: 560px; margin: 30px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
-  .receipt-header { background: linear-gradient(135deg, #1a56db 0%, #1e3a8a 100%); color: white; padding: 32px 28px; text-align: center; }
-  .receipt-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
-  .receipt-header .subtitle { font-size: 13px; opacity: 0.85; margin-bottom: 16px; }
-  .receipt-no { background: rgba(255,255,255,0.15); display: inline-block; padding: 6px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; }
-  .receipt-body { padding: 28px; }
-  .receipt-date { text-align: center; color: #6b7280; font-size: 13px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px dashed #e5e7eb; }
-  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-  .detail-item { background: #f9fafb; border-radius: 8px; padding: 12px 14px; }
-  .detail-label { font-size: 11px; text-transform: uppercase; color: #9ca3af; font-weight: 600; margin-bottom: 4px; }
-  .detail-value { font-size: 14px; font-weight: 500; color: #1f2937; }
-  .statement-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 14px; margin-bottom: 20px; }
-  .statement-box .detail-label { color: #92400e; }
-  .statement-box .detail-value { color: #78350f; }
-  .amount-box { background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 20px; }
-  .amount-label { font-size: 12px; color: #065f46; font-weight: 600; text-transform: uppercase; }
-  .amount-value { font-size: 32px; font-weight: 700; color: #047857; margin-top: 4px; }
-  .amount-currency { font-size: 16px; font-weight: 500; }
-  .receipt-footer { text-align: center; padding: 20px 28px 28px; border-top: 1px dashed #e5e7eb; }
-  .footer-text { color: #9ca3af; font-size: 12px; }
-  .footer-brand { color: #6b7280; font-size: 11px; margin-top: 8px; }
-  @media print { body { background: white; } .receipt { box-shadow: none; margin: 0; max-width: 100%; } }
-</style></head><body>
-  <div class="receipt">
-    <div class="receipt-header">
-      <h1>Al-Mashreq</h1>
-      <div class="subtitle">${isAr ? 'نظام إدارة العقارات' : 'Property Management System'}</div>
-      <div class="receipt-no">${isAr ? 'إيصال رقم' : 'RECEIPT'} #${record.id.replace('inc-', '').toUpperCase().slice(0, 8)}</div>
-    </div>
-    <div class="receipt-body">
-      <div class="receipt-date">${isAr ? 'تاريخ الإيصال' : 'Receipt Date'}: ${record.date}</div>
-      <div class="detail-grid">
-        <div class="detail-item"><div class="detail-label">${isAr ? 'المستأجر' : 'Tenant'}</div><div class="detail-value">${record.tenantName}</div></div>
-        <div class="detail-item"><div class="detail-label">${isAr ? 'الوحدة / العقار' : 'Unit / Property'}</div><div class="detail-value">${record.unitNumber} — ${isAr ? record.buildingNameAr : record.buildingName}</div></div>
-        <div class="detail-item"><div class="detail-label">${isAr ? 'طريقة الدفع' : 'Payment Method'}</div><div class="detail-value">${record.method === 'cash' ? (isAr ? 'نقداً' : 'Cash') : record.method === 'cheque' ? (isAr ? 'شيك' : 'Cheque') : (isAr ? 'تحويل بنكي' : 'Bank Transfer')}</div></div>
-        <div class="detail-item"><div class="detail-label">${isAr ? 'الفئة' : 'Category'}</div><div class="detail-value">${record.category === 'rent' ? (isAr ? 'إيجار' : 'Rent') : (isAr ? 'تأمين' : 'Deposit')}</div></div>
-      </div>
-      <div class="statement-box"><div class="detail-label">${isAr ? 'البيان' : 'Statement'}</div><div class="detail-value">${record.statement}</div></div>
-      <div class="amount-box"><div class="amount-label">${isAr ? 'المبلغ المدفوع' : 'Amount Paid'}</div><div class="amount-value">${record.amount.toLocaleString('en', {minimumFractionDigits:3,maximumFractionDigits:3})} <span class="amount-currency">OMR</span></div></div>
-    </div>
-    <div class="receipt-footer"><div class="footer-text">${isAr ? 'شكراً لكم — هذا إيصال رسمي' : 'Thank you — This is an official receipt'}</div><div class="footer-brand">${isAr ? 'المشرق للتطوير العقاري' : 'Al Mashreq Real Estate Development'} • ${new Date().getFullYear()}</div></div>
-  </div>
-</body></html>`);
-  w.document.close();
-  setTimeout(() => w.print(), 400);
-}
-
-// Print expense voucher for expense record
-function printExpenseVoucher(record: ExpenseRecord, lang: 'en' | 'ar') {
-  const isAr = lang === 'ar';
-  const dir = isAr ? 'rtl' : 'ltr';
-  const catLabel = (c: string) => ({
-    maintenance: isAr ? 'صيانة' : 'Maintenance',
-    utilities: isAr ? 'خدمات' : 'Utilities',
-    commission: isAr ? 'عمولة' : 'Commission',
-    other: isAr ? 'أخرى' : 'Other'
-  }[c] || c);
-  const w = window.open('', '_blank', 'width=700,height=800');
-  if (!w) return;
-  w.document.write(`<!DOCTYPE html><html dir="${dir}" lang="${lang}">
-<head><meta charset="utf-8"><title>${isAr ? 'سند صرف' : 'Expense Voucher'}</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: ${isAr ? "'Noto Sans Arabic'" : "'Inter'"}, sans-serif; color: #1a1a2e; background: #f8fafc; }
-  .voucher { max-width: 560px; margin: 30px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
-  .voucher-header { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: white; padding: 32px 28px; text-align: center; }
-  .voucher-header h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
-  .voucher-header .subtitle { font-size: 13px; opacity: 0.85; margin-bottom: 16px; }
-  .voucher-no { background: rgba(255,255,255,0.15); display: inline-block; padding: 6px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; }
-  .voucher-body { padding: 28px; }
-  .voucher-date { text-align: center; color: #6b7280; font-size: 13px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px dashed #e5e7eb; }
-  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-  .detail-item { background: #f9fafb; border-radius: 8px; padding: 12px 14px; }
-  .detail-label { font-size: 11px; text-transform: uppercase; color: #9ca3af; font-weight: 600; margin-bottom: 4px; }
-  .detail-value { font-size: 14px; font-weight: 500; color: #1f2937; }
-  .statement-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 14px; margin-bottom: 20px; }
-  .statement-box .detail-label { color: #991b1b; }
-  .statement-box .detail-value { color: #7f1d1d; }
-  .amount-box { background: linear-gradient(135deg, #fef2f2, #fecaca); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 20px; }
-  .amount-label { font-size: 12px; color: #991b1b; font-weight: 600; text-transform: uppercase; }
-  .amount-value { font-size: 32px; font-weight: 700; color: #dc2626; margin-top: 4px; }
-  .amount-currency { font-size: 16px; font-weight: 500; }
-  .voucher-footer { text-align: center; padding: 20px 28px 28px; border-top: 1px dashed #e5e7eb; }
-  .footer-text { color: #9ca3af; font-size: 12px; }
-  .footer-brand { color: #6b7280; font-size: 11px; margin-top: 8px; }
-  @media print { body { background: white; } .voucher { box-shadow: none; margin: 0; max-width: 100%; } }
-</style></head><body>
-  <div class="voucher">
-    <div class="voucher-header">
-      <h1>${isAr ? 'سند صرف' : 'Expense Voucher'}</h1>
-      <div class="subtitle">${isAr ? 'المشرق للتطوير العقاري' : 'Al Mashreq Real Estate Development'}</div>
-      <div class="voucher-no">${isAr ? 'سند رقم' : 'VOUCHER'} #${record.id.replace('exp-', '').toUpperCase().slice(0, 8)}</div>
-    </div>
-    <div class="voucher-body">
-      <div class="voucher-date">${isAr ? 'التاريخ' : 'Date'}: ${record.date}</div>
-      <div class="detail-grid">
-        <div class="detail-item"><div class="detail-label">${isAr ? 'العقار' : 'Property'}</div><div class="detail-value">${isAr ? record.buildingNameAr : record.buildingName}</div></div>
-        <div class="detail-item"><div class="detail-label">${isAr ? 'الوحدة' : 'Unit'}</div><div class="detail-value">${record.unitNumber}</div></div>
-        <div class="detail-item"><div class="detail-label">${isAr ? 'الفئة' : 'Category'}</div><div class="detail-value">${catLabel(record.category)}</div></div>
-      </div>
-      <div class="statement-box"><div class="detail-label">${isAr ? 'البيان' : 'Statement'}</div><div class="detail-value">${record.statement}</div></div>
-      <div class="amount-box"><div class="amount-label">${isAr ? 'المبلغ المصروف' : 'Amount Paid'}</div><div class="amount-value">${record.amount.toLocaleString('en', {minimumFractionDigits:3,maximumFractionDigits:3})} <span class="amount-currency">OMR</span></div></div>
-    </div>
-    <div class="voucher-footer"><div class="footer-text">${isAr ? 'هذا سند صرف رسمي' : 'This is an official expense voucher'}</div><div class="footer-brand">${isAr ? 'المشرق للتطوير العقاري' : 'Al Mashreq Real Estate Development'} • ${new Date().getFullYear()}</div></div>
-  </div>
-</body></html>`);
-  w.document.close();
-  setTimeout(() => w.print(), 400);
-}
 
 const Financials = () => {
   const { t, lang } = useI18n();
@@ -257,7 +137,7 @@ const Financials = () => {
                 <TableRow className="bg-status-available/5">
                   <TableHead>{t('date')}</TableHead><TableHead>{t('tenantName')}</TableHead><TableHead>{t('unitNumber')} / {t('property')}</TableHead>
                   <TableHead>{t('statement')}</TableHead><TableHead>{t('category')}</TableHead><TableHead>{t('paymentMethod')}</TableHead>
-                  <TableHead className="text-end">{t('amount')}</TableHead><TableHead className="w-24">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
+                  <TableHead className="text-end">{t('amount')}</TableHead><TableHead className="w-32">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -275,6 +155,7 @@ const Financials = () => {
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <button onClick={() => printReceipt(rec, lang)} className="p-1.5 rounded hover:bg-status-available/10 text-status-available" title={t('generateReceipt')}><Printer className="h-4 w-4" /></button>
+                        <button onClick={() => shareReceiptWhatsApp(rec, lang)} className="p-1.5 rounded hover:bg-status-available/10 text-muted-foreground hover:text-status-available" title="WhatsApp"><Share2 className="h-4 w-4" /></button>
                         <button onClick={() => confirmDeleteIncome(rec.id)} className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
                       </div>
                     </TableCell>
@@ -301,7 +182,7 @@ const Financials = () => {
                 <TableRow className="bg-status-occupied/5">
                   <TableHead>{t('date')}</TableHead><TableHead>{t('category')}</TableHead><TableHead>{t('statement')}</TableHead>
                   <TableHead>{t('property')}</TableHead><TableHead>{t('unitNumber')}</TableHead>
-                  <TableHead className="text-end">{t('amount')}</TableHead><TableHead className="w-24">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
+                  <TableHead className="text-end">{t('amount')}</TableHead><TableHead className="w-32">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -317,7 +198,8 @@ const Financials = () => {
                     <TableCell className="text-end font-bold text-status-occupied whitespace-nowrap">{formatCurrency(rec.amount, lang)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <button onClick={() => printExpenseVoucher(rec, lang)} className="p-1.5 rounded hover:bg-status-occupied/10 text-status-occupied"><Printer className="h-4 w-4" /></button>
+                        <button onClick={() => printExpenseVoucher(rec, lang)} className="p-1.5 rounded hover:bg-status-occupied/10 text-status-occupied" title={isAr ? 'سند صرف' : 'Voucher'}><Printer className="h-4 w-4" /></button>
+                        <button onClick={() => shareExpenseWhatsApp(rec, lang)} className="p-1.5 rounded hover:bg-status-occupied/10 text-muted-foreground hover:text-status-occupied" title="WhatsApp"><Share2 className="h-4 w-4" /></button>
                         <button onClick={() => confirmDeleteExpense(rec.id)} className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
                       </div>
                     </TableCell>
