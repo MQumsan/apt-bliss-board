@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react';
-import { Wrench, Plus, CheckCircle, Clock, Download, Pen, Trash2 } from 'lucide-react';
+import { Wrench, Plus, CheckCircle, Clock, Download, Pen, Trash2, Share2 } from 'lucide-react';
 import { formatCurrency, CURRENCY } from '@/lib/currency';
 import { PageLayout } from '@/components/PageLayout';
 import { useI18n } from '@/lib/i18n';
 import { useMaintenance, MaintenanceRecord } from '@/lib/maintenanceStore';
-import { useBuildings } from '@/lib/store';
+import { useBuildings, useFinance } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,10 +22,13 @@ const MaintenancePage = () => {
   const isAr = lang === 'ar';
   const { records, addRecord, editRecord, deleteRecord, updateStatus, totalMaintenanceCost } = useMaintenance();
   const { buildings } = useBuildings();
+  const { addExpense } = useFinance();
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [completeOpen, setCompleteOpen] = useState(false);
   const [selectedId, setSelectedId] = useState('');
+  const [finalCost, setFinalCost] = useState('');
   const [form, setForm] = useState({ buildingId: '', unitNumber: '', issueDescription: '', cost: '', date: '', status: 'pending' as string });
 
   const buildingUnits = useMemo(() => {
@@ -67,10 +70,46 @@ const MaintenancePage = () => {
     setDeleteOpen(false);
   };
 
+  // Maintenance-Expense Bridge: prompt for final cost on completion
+  const openCompleteDialog = (r: MaintenanceRecord) => {
+    setSelectedId(r.id);
+    setFinalCost(String(r.cost));
+    setCompleteOpen(true);
+  };
+
+  const handleComplete = () => {
+    const record = records.find(r => r.id === selectedId);
+    if (!record) return;
+    const cost = Number(finalCost) || record.cost;
+
+    // Update maintenance record
+    updateStatus(selectedId, 'completed');
+    editRecord(selectedId, { cost });
+
+    // Auto-create expense record
+    addExpense({
+      date: new Date().toISOString().split('T')[0],
+      category: 'maintenance',
+      amount: cost,
+      buildingName: record.buildingName,
+      buildingNameAr: record.buildingNameAr,
+      unitNumber: record.unitNumber,
+      statement: `${isAr ? 'صيانة:' : 'Maintenance:'} ${record.issueDescription}`,
+    });
+
+    toast({ title: isAr ? 'تم إكمال الصيانة وتسجيل المصروف تلقائياً' : 'Maintenance completed & expense auto-recorded' });
+    setCompleteOpen(false);
+  };
+
   const handleExport = () => {
     const headers = [isAr ? 'التاريخ' : 'Date', isAr ? 'المبنى' : 'Building', isAr ? 'الوحدة' : 'Unit', isAr ? 'الوصف' : 'Description', isAr ? 'التكلفة' : 'Cost', isAr ? 'الحالة' : 'Status'];
     const rows = records.map(r => [r.date, isAr ? r.buildingNameAr : r.buildingName, r.unitNumber, r.issueDescription, String(r.cost), r.status === 'pending' ? (isAr ? 'قيد الانتظار' : 'Pending') : (isAr ? 'مكتمل' : 'Completed')]);
     exportToCsv('maintenance.csv', headers, rows);
+  };
+
+  const shareWhatsApp = (r: MaintenanceRecord) => {
+    const text = `${isAr ? 'تقرير صيانة' : 'Maintenance Report'}%0A${isAr ? 'المبنى' : 'Building'}: ${isAr ? r.buildingNameAr : r.buildingName}%0A${isAr ? 'الوحدة' : 'Unit'}: ${r.unitNumber}%0A${isAr ? 'الوصف' : 'Issue'}: ${r.issueDescription}%0A${isAr ? 'التكلفة' : 'Cost'}: ${r.cost} OMR%0A${isAr ? 'الحالة' : 'Status'}: ${r.status === 'pending' ? (isAr ? 'قيد الانتظار' : 'Pending') : (isAr ? 'مكتمل' : 'Completed')}`;
+    window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
   const renderMaintenanceForm = (onSubmit: (e: React.FormEvent) => void, submitLabel: string) => (
@@ -85,7 +124,7 @@ const MaintenancePage = () => {
           <Select value={form.unitNumber} onValueChange={v => setForm(p => ({...p, unitNumber: v}))}><SelectTrigger><SelectValue placeholder={t('selectUnit')} /></SelectTrigger>
             <SelectContent>{buildingUnits.map(u => <SelectItem key={u.id} value={u.unitNumber}>{t('unitNumber')} {u.unitNumber}</SelectItem>)}</SelectContent></Select>
         </div>
-        <div className="space-y-1.5"><Label>{isAr ? 'التكلفة' : 'Cost'} ({CURRENCY}) *</Label><Input type="number" min="0" value={form.cost} onChange={e => setForm(p => ({...p, cost: e.target.value}))} dir="ltr" /></div>
+        <div className="space-y-1.5"><Label>{isAr ? 'التكلفة المقدرة' : 'Estimated Cost'} ({CURRENCY}) *</Label><Input type="number" min="0" value={form.cost} onChange={e => setForm(p => ({...p, cost: e.target.value}))} dir="ltr" /></div>
       </div>
       <div className="space-y-1.5"><Label>{isAr ? 'وصف المشكلة' : 'Issue Description'} *</Label>
         <Textarea value={form.issueDescription} onChange={e => setForm(p => ({...p, issueDescription: e.target.value}))} rows={3} placeholder={isAr ? 'وصف تفصيلي للمشكلة...' : 'Detailed description...'} className="resize-none" />
@@ -128,7 +167,7 @@ const MaintenancePage = () => {
             <TableRow className="bg-muted/50">
               <TableHead>{t('date')}</TableHead><TableHead>{t('building')}</TableHead><TableHead>{t('unitNumber')}</TableHead>
               <TableHead>{isAr ? 'الوصف' : 'Description'}</TableHead><TableHead className="text-end">{isAr ? 'التكلفة' : 'Cost'}</TableHead>
-              <TableHead>{t('status')}</TableHead><TableHead className="w-32">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
+              <TableHead>{t('status')}</TableHead><TableHead className="w-40">{isAr ? 'إجراءات' : 'Actions'}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -148,12 +187,15 @@ const MaintenancePage = () => {
                 <TableCell>
                   <div className="flex items-center gap-1">
                     {r.status === 'pending' && (
-                      <Button size="sm" variant="outline" className="h-7 text-xs gap-1 text-status-available" onClick={() => { updateStatus(r.id, 'completed'); toast({ title: isAr ? 'تم تحديث الحالة' : 'Status updated' }); }}>
+                      <Button size="sm" variant="outline" className="h-7 text-xs gap-1 text-status-available" onClick={() => openCompleteDialog(r)}>
                         <CheckCircle className="h-3.5 w-3.5" />
                       </Button>
                     )}
                     <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => openEdit(r)}>
                       <Pen className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-status-available" onClick={() => shareWhatsApp(r)}>
+                      <Share2 className="h-4 w-4" />
                     </Button>
                     <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => { setSelectedId(r.id); setDeleteOpen(true); }}>
                       <Trash2 className="h-4 w-4" />
@@ -165,6 +207,24 @@ const MaintenancePage = () => {
           </TableBody>
         </Table>
       </div>
+
+      {/* Complete Maintenance Dialog - Prompt for Final Cost */}
+      <Dialog open={completeOpen} onOpenChange={setCompleteOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><CheckCircle className="h-5 w-5 text-status-available" />{isAr ? 'إتمام الصيانة' : 'Complete Maintenance'}</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">{isAr ? 'أدخل التكلفة النهائية. سيتم تسجيل مصروف تلقائياً في المالية.' : 'Enter the final cost. An expense will be auto-recorded in Financials.'}</p>
+            <div className="space-y-1.5">
+              <Label>{isAr ? 'التكلفة النهائية' : 'Final Cost'} ({CURRENCY})</Label>
+              <Input type="number" min="0" value={finalCost} onChange={e => setFinalCost(e.target.value)} dir="ltr" />
+            </div>
+          </div>
+          <DialogFooter className="gap-2 pt-2">
+            <Button variant="outline" onClick={() => setCompleteOpen(false)}>{t('cancel')}</Button>
+            <Button onClick={handleComplete} className="bg-status-available hover:bg-status-available/90 text-status-available-foreground">{isAr ? 'إتمام وتسجيل مصروف' : 'Complete & Record Expense'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">

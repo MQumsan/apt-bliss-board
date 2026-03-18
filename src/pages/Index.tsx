@@ -1,10 +1,10 @@
-import { useState } from 'react';
 import { FileCheck, AlertTriangle, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { formatCurrency } from '@/lib/currency';
 import { PageLayout } from '@/components/PageLayout';
 import { BuildingTabs } from '@/components/BuildingTabs';
 import { StatsBar } from '@/components/StatsBar';
+import { DashboardCharts } from '@/components/DashboardCharts';
 import { useI18n } from '@/lib/i18n';
 import { useCheques } from '@/lib/chequeStore';
 import { useContracts } from '@/lib/contractStore';
@@ -22,8 +22,11 @@ const Index = () => {
     <PageLayout>
       <StatsBar />
 
+      {/* Dashboard Charts & Summary Cards */}
+      <DashboardCharts />
+
       {expiringContracts.length > 0 && (
-        <div className="bg-status-expiring/5 rounded-lg border border-status-expiring/20 p-4 mb-4">
+        <div className="bg-status-expiring/5 rounded-lg border border-status-expiring/20 p-4 mb-4 mt-6">
           <h3 className="text-sm font-semibold text-status-expiring flex items-center gap-2 mb-3">
             <FileText className="h-4 w-4" />
             {lang === 'ar' ? 'عقود تنتهي قريباً' : 'Expiring Contracts'}

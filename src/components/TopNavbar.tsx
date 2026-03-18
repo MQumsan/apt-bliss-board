@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Building2, Bell, Plus, Languages, LogOut, User, Settings, ChevronDown, UserPlus, DollarSign, FileText, Home, TrendingUp } from 'lucide-react';
+import {
+  Building2, Bell, Plus, Languages, LogOut, User, Settings, ChevronDown,
+  UserPlus, DollarSign, FileText, Home, TrendingUp, LayoutDashboard,
+  Users, Wrench, BookOpen, BarChart3, CreditCard,
+} from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { useCheques } from '@/lib/chequeStore';
 import { useContracts } from '@/lib/contractStore';
@@ -13,15 +17,15 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 const navItems = [
-  { key: 'dashboard', path: '/' },
-  { key: 'buildings', path: '/buildings' },
-  { key: 'unitsMonitor', path: '/units-monitor' },
-  { key: 'tenants', path: '/tenants' },
-  { key: 'contracts', path: '/contracts' },
-  { key: 'financials', path: '/financials' },
-  { key: 'maintenance', path: '/maintenance' },
-  { key: 'cheques', path: '/cheques' },
-  { key: 'reports', path: '/reports' },
+  { key: 'dashboard', path: '/', icon: LayoutDashboard },
+  { key: 'buildings', path: '/buildings', icon: Building2 },
+  { key: 'unitsMonitor', path: '/units-monitor', icon: Home },
+  { key: 'tenants', path: '/tenants', icon: Users },
+  { key: 'contracts', path: '/contracts', icon: BookOpen },
+  { key: 'financials', path: '/financials', icon: DollarSign },
+  { key: 'maintenance', path: '/maintenance', icon: Wrench },
+  { key: 'cheques', path: '/cheques', icon: CreditCard },
+  { key: 'reports', path: '/reports', icon: BarChart3 },
 ] as const;
 
 export function TopNavbar() {
@@ -52,19 +56,28 @@ export function TopNavbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 h-14 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 px-4 flex items-center justify-between">
+    <nav className="sticky top-0 z-50 h-14 border-b border-border bg-card shadow-sm px-4 flex items-center justify-between">
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
           <img src={logoImage} alt="Al Mashreq" className="h-8 w-8 rounded-lg" />
           <span className="text-sm font-bold text-foreground hidden md:inline">{isAr ? 'المشرق' : 'Al Mashreq'}</span>
         </div>
-        <div className="hidden lg:flex items-center gap-1">
+        <div className="hidden lg:flex items-center gap-0.5">
           {navItems.map(item => {
             const isActive = location.pathname === item.path;
+            const Icon = item.icon;
             return (
               <button key={item.path} onClick={() => navigate(item.path)}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${isActive ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}`}>
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors flex items-center gap-1.5 relative ${
+                  isActive
+                    ? 'text-primary font-bold'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                }`}>
+                <Icon className="h-3.5 w-3.5" />
                 {label(item.key)}
+                {isActive && (
+                  <span className="absolute bottom-0 left-2 right-2 h-[3px] bg-primary rounded-t-full" />
+                )}
               </button>
             );
           })}
@@ -75,7 +88,7 @@ export function TopNavbar() {
         {/* Expanded Quick Add */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-1.5 h-8">
+            <Button size="sm" className="gap-1.5 h-8 bg-primary hover:bg-primary/90 text-primary-foreground">
               <Plus className="h-3.5 w-3.5" />
               <span className="hidden sm:inline text-xs">{isAr ? 'إضافة سريعة' : 'Quick Add'}</span>
             </Button>
@@ -151,7 +164,14 @@ export function TopNavbar() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            {navItems.map(item => (<DropdownMenuItem key={item.path} onClick={() => navigate(item.path)}>{label(item.key)}</DropdownMenuItem>))}
+            {navItems.map(item => {
+              const Icon = item.icon;
+              return (
+                <DropdownMenuItem key={item.path} onClick={() => navigate(item.path)}>
+                  <Icon className="h-4 w-4 me-2" />{label(item.key)}
+                </DropdownMenuItem>
+              );
+            })}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
