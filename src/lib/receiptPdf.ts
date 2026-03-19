@@ -9,8 +9,19 @@ function openPrintWindow(html: string) {
   setTimeout(() => w.print(), 400);
 }
 
-function shareWhatsApp(text: string) {
-  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+function promptPhone(): string | null {
+  const phone = window.prompt('أدخل رقم هاتف المستأجر (مثال: 96899123456)\nEnter tenant phone number (e.g. 96899123456):');
+  if (!phone || !phone.trim()) return null;
+  return phone.trim().replace(/[^0-9+]/g, '');
+}
+
+function openWhatsApp(phone: string | null, text: string) {
+  const encoded = encodeURIComponent(text);
+  if (phone) {
+    window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+  } else {
+    window.open(`https://wa.me/?text=${encoded}`, '_blank');
+  }
 }
 
 export function printReceipt(record: IncomeRecord, lang: 'en' | 'ar') {
@@ -69,10 +80,22 @@ export function printReceipt(record: IncomeRecord, lang: 'en' | 'ar') {
 </body></html>`);
 }
 
-export function shareReceiptWhatsApp(record: IncomeRecord, lang: 'en' | 'ar') {
-  const isAr = lang === 'ar';
-  const text = `${isAr ? 'سند قبض — المشرق للتطوير العقاري' : 'Payment Receipt — Al Mashreq Real Estate'}\n${isAr ? 'المستأجر' : 'Tenant'}: ${record.tenantName}\n${isAr ? 'الوحدة' : 'Unit'}: ${record.unitNumber}\n${isAr ? 'المبلغ' : 'Amount'}: ${record.amount.toLocaleString('en', {minimumFractionDigits:3})} OMR\n${isAr ? 'التاريخ' : 'Date'}: ${record.date}\n${isAr ? 'البيان' : 'Statement'}: ${record.statement}`;
-  shareWhatsApp(text);
+export function shareReceiptWhatsApp(record: IncomeRecord, _lang: 'en' | 'ar') {
+  const receiptId = record.id.replace('inc-', '').toUpperCase().slice(0, 8);
+  const text = `🏢 *المشرق للتطوير العقاري* 🏢
+
+*إشعار سند قبض جديد*
+---------------------------
+👤 *المستأجر:* ${record.tenantName}
+💰 *المبلغ:* ${record.amount.toLocaleString('en', { minimumFractionDigits: 3 })} ر.ع
+🗓️ *التاريخ:* ${record.date}
+📝 *البيان:* ${record.statement}
+📑 *رقم السند:* ${receiptId}
+---------------------------
+نشكركم لثقتكم بنا.
+📍 مسقط، سلطنة عُمان`;
+  const phone = promptPhone();
+  openWhatsApp(phone, text);
 }
 
 export function printExpenseVoucher(record: ExpenseRecord, lang: 'en' | 'ar') {
@@ -136,10 +159,22 @@ export function printExpenseVoucher(record: ExpenseRecord, lang: 'en' | 'ar') {
 </body></html>`);
 }
 
-export function shareExpenseWhatsApp(record: ExpenseRecord, lang: 'en' | 'ar') {
-  const isAr = lang === 'ar';
-  const text = `${isAr ? 'سند صرف — المشرق للتطوير العقاري' : 'Expense Voucher — Al Mashreq Real Estate'}\n${isAr ? 'العقار' : 'Property'}: ${isAr ? record.buildingNameAr : record.buildingName}\n${isAr ? 'الوحدة' : 'Unit'}: ${record.unitNumber}\n${isAr ? 'المبلغ' : 'Amount'}: ${record.amount.toLocaleString('en', {minimumFractionDigits:3})} OMR\n${isAr ? 'التاريخ' : 'Date'}: ${record.date}\n${isAr ? 'البيان' : 'Statement'}: ${record.statement}`;
-  shareWhatsApp(text);
+export function shareExpenseWhatsApp(record: ExpenseRecord, _lang: 'en' | 'ar') {
+  const voucherId = record.id.replace('exp-', '').toUpperCase().slice(0, 8);
+  const text = `🏢 *المشرق للتطوير العقاري* 🏢
+
+*إشعار سند صرف*
+---------------------------
+🏠 *العقار:* ${record.buildingNameAr || record.buildingName}
+🔢 *الوحدة:* ${record.unitNumber}
+💰 *المبلغ:* ${record.amount.toLocaleString('en', { minimumFractionDigits: 3 })} ر.ع
+🗓️ *التاريخ:* ${record.date}
+📝 *البيان:* ${record.statement}
+📑 *رقم السند:* ${voucherId}
+---------------------------
+📍 مسقط، سلطنة عُمان`;
+  const phone = promptPhone();
+  openWhatsApp(phone, text);
 }
 
 export function printContract(contract: Contract, lang: 'en' | 'ar') {
@@ -205,8 +240,22 @@ export function printContract(contract: Contract, lang: 'en' | 'ar') {
 </body></html>`);
 }
 
-export function shareContractWhatsApp(contract: Contract, lang: 'en' | 'ar') {
-  const isAr = lang === 'ar';
-  const text = `${isAr ? 'عقد إيجار — المشرق للتطوير العقاري' : 'Lease Contract — Al Mashreq Real Estate'}\n${isAr ? 'المستأجر' : 'Tenant'}: ${contract.tenantName}\n${isAr ? 'الوحدة' : 'Unit'}: ${contract.unitNumber} — ${isAr ? contract.buildingNameAr : contract.buildingName}\n${isAr ? 'الفترة' : 'Period'}: ${contract.startDate} → ${contract.endDate}\n${isAr ? 'الإيجار السنوي' : 'Annual Rent'}: ${contract.annualRent.toLocaleString('en', {minimumFractionDigits:3})} OMR`;
-  shareWhatsApp(text);
+export function shareContractWhatsApp(contract: Contract, _lang: 'en' | 'ar') {
+  const contractId = contract.id.replace('ctr-', '').toUpperCase().slice(0, 8);
+  const text = `🏢 *المشرق للتطوير العقاري* 🏢
+
+*إشعار عقد إيجار*
+---------------------------
+👤 *المستأجر:* ${contract.tenantName}
+🏠 *العقار:* ${contract.buildingNameAr || contract.buildingName}
+🔢 *الوحدة:* ${contract.unitNumber}
+🗓️ *الفترة:* ${contract.startDate} → ${contract.endDate}
+💰 *الإيجار الشهري:* ${contract.monthlyRent.toLocaleString('en', { minimumFractionDigits: 3 })} ر.ع
+💰 *الإيجار السنوي:* ${contract.annualRent.toLocaleString('en', { minimumFractionDigits: 3 })} ر.ع
+📑 *رقم العقد:* ${contractId}
+---------------------------
+نشكركم لثقتكم بنا.
+📍 مسقط، سلطنة عُمان`;
+  const phone = promptPhone();
+  openWhatsApp(phone, text);
 }
