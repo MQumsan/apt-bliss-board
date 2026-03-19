@@ -108,8 +108,22 @@ const MaintenancePage = () => {
   };
 
   const shareWhatsApp = (r: MaintenanceRecord) => {
-    const text = `${isAr ? 'تقرير صيانة' : 'Maintenance Report'}%0A${isAr ? 'المبنى' : 'Building'}: ${isAr ? r.buildingNameAr : r.buildingName}%0A${isAr ? 'الوحدة' : 'Unit'}: ${r.unitNumber}%0A${isAr ? 'الوصف' : 'Issue'}: ${r.issueDescription}%0A${isAr ? 'التكلفة' : 'Cost'}: ${r.cost} OMR%0A${isAr ? 'الحالة' : 'Status'}: ${r.status === 'pending' ? (isAr ? 'قيد الانتظار' : 'Pending') : (isAr ? 'مكتمل' : 'Completed')}`;
-    window.open(`https://wa.me/?text=${text}`, '_blank');
+    const text = `🏢 *المشرق للتطوير العقاري* 🏢
+
+*تقرير صيانة*
+---------------------------
+🏠 *المبنى:* ${r.buildingNameAr || r.buildingName}
+🔢 *الوحدة:* ${r.unitNumber}
+🔧 *الوصف:* ${r.issueDescription}
+💰 *التكلفة:* ${r.cost.toLocaleString('en', { minimumFractionDigits: 3 })} ر.ع
+📊 *الحالة:* ${r.status === 'pending' ? 'قيد الانتظار' : 'مكتمل'}
+🗓️ *التاريخ:* ${r.date}
+---------------------------
+📍 مسقط، سلطنة عُمان`;
+    const phone = window.prompt('أدخل رقم هاتف المستلم (مثال: 96899123456)\nEnter recipient phone number:');
+    const cleanPhone = phone?.trim().replace(/[^0-9+]/g, '') || '';
+    const encoded = encodeURIComponent(text);
+    window.open(cleanPhone ? `https://wa.me/${cleanPhone}?text=${encoded}` : `https://wa.me/?text=${encoded}`, '_blank');
   };
 
   const renderMaintenanceForm = (onSubmit: (e: React.FormEvent) => void, submitLabel: string) => (
