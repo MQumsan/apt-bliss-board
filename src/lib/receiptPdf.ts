@@ -80,10 +80,22 @@ export function printReceipt(record: IncomeRecord, lang: 'en' | 'ar') {
 </body></html>`);
 }
 
-export function shareReceiptWhatsApp(record: IncomeRecord, lang: 'en' | 'ar') {
-  const isAr = lang === 'ar';
-  const text = `${isAr ? 'سند قبض — المشرق للتطوير العقاري' : 'Payment Receipt — Al Mashreq Real Estate'}\n${isAr ? 'المستأجر' : 'Tenant'}: ${record.tenantName}\n${isAr ? 'الوحدة' : 'Unit'}: ${record.unitNumber}\n${isAr ? 'المبلغ' : 'Amount'}: ${record.amount.toLocaleString('en', {minimumFractionDigits:3})} OMR\n${isAr ? 'التاريخ' : 'Date'}: ${record.date}\n${isAr ? 'البيان' : 'Statement'}: ${record.statement}`;
-  shareWhatsApp(text);
+export function shareReceiptWhatsApp(record: IncomeRecord, _lang: 'en' | 'ar') {
+  const receiptId = record.id.replace('inc-', '').toUpperCase().slice(0, 8);
+  const text = `🏢 *المشرق للتطوير العقاري* 🏢
+
+*إشعار سند قبض جديد*
+---------------------------
+👤 *المستأجر:* ${record.tenantName}
+💰 *المبلغ:* ${record.amount.toLocaleString('en', { minimumFractionDigits: 3 })} ر.ع
+🗓️ *التاريخ:* ${record.date}
+📝 *البيان:* ${record.statement}
+📑 *رقم السند:* ${receiptId}
+---------------------------
+نشكركم لثقتكم بنا.
+📍 مسقط، سلطنة عُمان`;
+  const phone = promptPhone();
+  openWhatsApp(phone, text);
 }
 
 export function printExpenseVoucher(record: ExpenseRecord, lang: 'en' | 'ar') {
