@@ -159,10 +159,22 @@ export function printExpenseVoucher(record: ExpenseRecord, lang: 'en' | 'ar') {
 </body></html>`);
 }
 
-export function shareExpenseWhatsApp(record: ExpenseRecord, lang: 'en' | 'ar') {
-  const isAr = lang === 'ar';
-  const text = `${isAr ? 'سند صرف — المشرق للتطوير العقاري' : 'Expense Voucher — Al Mashreq Real Estate'}\n${isAr ? 'العقار' : 'Property'}: ${isAr ? record.buildingNameAr : record.buildingName}\n${isAr ? 'الوحدة' : 'Unit'}: ${record.unitNumber}\n${isAr ? 'المبلغ' : 'Amount'}: ${record.amount.toLocaleString('en', {minimumFractionDigits:3})} OMR\n${isAr ? 'التاريخ' : 'Date'}: ${record.date}\n${isAr ? 'البيان' : 'Statement'}: ${record.statement}`;
-  shareWhatsApp(text);
+export function shareExpenseWhatsApp(record: ExpenseRecord, _lang: 'en' | 'ar') {
+  const voucherId = record.id.replace('exp-', '').toUpperCase().slice(0, 8);
+  const text = `🏢 *المشرق للتطوير العقاري* 🏢
+
+*إشعار سند صرف*
+---------------------------
+🏠 *العقار:* ${record.buildingNameAr || record.buildingName}
+🔢 *الوحدة:* ${record.unitNumber}
+💰 *المبلغ:* ${record.amount.toLocaleString('en', { minimumFractionDigits: 3 })} ر.ع
+🗓️ *التاريخ:* ${record.date}
+📝 *البيان:* ${record.statement}
+📑 *رقم السند:* ${voucherId}
+---------------------------
+📍 مسقط، سلطنة عُمان`;
+  const phone = promptPhone();
+  openWhatsApp(phone, text);
 }
 
 export function printContract(contract: Contract, lang: 'en' | 'ar') {
