@@ -9,8 +9,19 @@ function openPrintWindow(html: string) {
   setTimeout(() => w.print(), 400);
 }
 
-function shareWhatsApp(text: string) {
-  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+function promptPhone(): string | null {
+  const phone = window.prompt('أدخل رقم هاتف المستأجر (مثال: 96899123456)\nEnter tenant phone number (e.g. 96899123456):');
+  if (!phone || !phone.trim()) return null;
+  return phone.trim().replace(/[^0-9+]/g, '');
+}
+
+function openWhatsApp(phone: string | null, text: string) {
+  const encoded = encodeURIComponent(text);
+  if (phone) {
+    window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+  } else {
+    window.open(`https://wa.me/?text=${encoded}`, '_blank');
+  }
 }
 
 export function printReceipt(record: IncomeRecord, lang: 'en' | 'ar') {
