@@ -181,9 +181,11 @@ export function printExpenseVoucher(record: ExpenseRecord, lang: 'en' | 'ar') {
 </body></html>`);
 }
 
-export function shareExpenseWhatsApp(record: ExpenseRecord, _lang: 'en' | 'ar') {
+export function shareExpenseWhatsApp(record: ExpenseRecord, lang: 'en' | 'ar') {
   const voucherId = record.id.replace('exp-', '').toUpperCase().slice(0, 8);
-  const text = `🏢 *المشرق للتطوير العقاري* 🏢
+  const isAr = lang === 'ar';
+  const text = isAr
+    ? `🏢 *المشرق للتطوير العقاري* 🏢
 
 *إشعار سند صرف*
 ---------------------------
@@ -194,9 +196,21 @@ export function shareExpenseWhatsApp(record: ExpenseRecord, _lang: 'en' | 'ar') 
 📝 *البيان:* ${record.statement}
 📑 *رقم السند:* ${voucherId}
 ---------------------------
-📍 مسقط، سلطنة عُمان`;
+📍 مسقط، سلطنة عُمان`
+    : `🏢 *Al Mashreq Real Estate Development* 🏢
+
+*Expense Voucher Notice*
+---------------------------
+🏠 *Property:* ${record.buildingName}
+🔢 *Unit:* ${record.unitNumber}
+💰 *Amount:* ${record.amount.toLocaleString('en', { minimumFractionDigits: 3 })} OMR
+🗓️ *Date:* ${record.date}
+📝 *Statement:* ${record.statement}
+📑 *Voucher No:* ${voucherId}
+---------------------------
+📍 Muscat, Sultanate of Oman`;
   const phone = promptPhone();
-  openWhatsApp(phone, text);
+  sendWhatsApp(phone, text);
 }
 
 export function printContract(contract: Contract, lang: 'en' | 'ar') {
