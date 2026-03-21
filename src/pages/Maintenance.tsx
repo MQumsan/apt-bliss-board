@@ -108,7 +108,8 @@ const MaintenancePage = () => {
   };
 
   const shareWhatsApp = (r: MaintenanceRecord) => {
-    const text = `🏢 *المشرق للتطوير العقاري* 🏢
+    const text = isAr
+      ? `🏢 *المشرق للتطوير العقاري* 🏢
 
 *تقرير صيانة*
 ---------------------------
@@ -119,11 +120,34 @@ const MaintenancePage = () => {
 📊 *الحالة:* ${r.status === 'pending' ? 'قيد الانتظار' : 'مكتمل'}
 🗓️ *التاريخ:* ${r.date}
 ---------------------------
-📍 مسقط، سلطنة عُمان`;
-    const phone = window.prompt('أدخل رقم هاتف المستلم (مثال: 96899123456)\nEnter recipient phone number:');
-    const cleanPhone = phone?.trim().replace(/[^0-9+]/g, '') || '';
+📍 مسقط، سلطنة عُمان`
+      : `🏢 *Al Mashreq Real Estate Development* 🏢
+
+*Maintenance Report*
+---------------------------
+🏠 *Building:* ${r.buildingName}
+🔢 *Unit:* ${r.unitNumber}
+🔧 *Description:* ${r.issueDescription}
+💰 *Cost:* ${r.cost.toLocaleString('en', { minimumFractionDigits: 3 })} OMR
+📊 *Status:* ${r.status === 'pending' ? 'Pending' : 'Completed'}
+🗓️ *Date:* ${r.date}
+---------------------------
+📍 Muscat, Sultanate of Oman`;
+    const phoneInput = window.prompt(isAr ? 'أدخل رقم هاتف المستلم (مثال: 96899123456):' : 'Enter recipient phone number (e.g. 96899123456):');
+    let cleanPhone = phoneInput?.trim().replace(/[\s\-\+\(\)]/g, '') || '';
+    if (cleanPhone && !cleanPhone.startsWith('968') && cleanPhone.length <= 8) {
+      cleanPhone = '968' + cleanPhone;
+    }
     const encoded = encodeURIComponent(text);
-    window.open(cleanPhone ? `https://wa.me/${cleanPhone}?text=${encoded}` : `https://wa.me/?text=${encoded}`, '_blank');
+    const url = cleanPhone
+      ? `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encoded}`
+      : `https://api.whatsapp.com/send?text=${encoded}`;
+    const win = window.open(url, '_blank');
+    if (!win) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert(isAr ? 'تم نسخ الرسالة. الصقها في واتساب.' : 'Message copied. Paste it in WhatsApp.');
+      });
+    }
   };
 
   const renderMaintenanceForm = (onSubmit: (e: React.FormEvent) => void, submitLabel: string) => (

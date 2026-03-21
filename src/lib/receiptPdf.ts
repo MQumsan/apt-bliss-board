@@ -276,9 +276,11 @@ export function printContract(contract: Contract, lang: 'en' | 'ar') {
 </body></html>`);
 }
 
-export function shareContractWhatsApp(contract: Contract, _lang: 'en' | 'ar') {
+export function shareContractWhatsApp(contract: Contract, lang: 'en' | 'ar') {
   const contractId = contract.id.replace('ctr-', '').toUpperCase().slice(0, 8);
-  const text = `🏢 *المشرق للتطوير العقاري* 🏢
+  const isAr = lang === 'ar';
+  const text = isAr
+    ? `🏢 *المشرق للتطوير العقاري* 🏢
 
 *إشعار عقد إيجار*
 ---------------------------
@@ -291,7 +293,21 @@ export function shareContractWhatsApp(contract: Contract, _lang: 'en' | 'ar') {
 📑 *رقم العقد:* ${contractId}
 ---------------------------
 نشكركم لثقتكم بنا.
-📍 مسقط، سلطنة عُمان`;
+📍 مسقط، سلطنة عُمان`
+    : `🏢 *Al Mashreq Real Estate Development* 🏢
+
+*Lease Contract Notice*
+---------------------------
+👤 *Tenant:* ${contract.tenantName}
+🏠 *Property:* ${contract.buildingName}
+🔢 *Unit:* ${contract.unitNumber}
+🗓️ *Period:* ${contract.startDate} → ${contract.endDate}
+💰 *Monthly Rent:* ${contract.monthlyRent.toLocaleString('en', { minimumFractionDigits: 3 })} OMR
+💰 *Annual Rent:* ${contract.annualRent.toLocaleString('en', { minimumFractionDigits: 3 })} OMR
+📑 *Contract No:* ${contractId}
+---------------------------
+Thank you for your trust.
+📍 Muscat, Sultanate of Oman`;
   const phone = promptPhone();
-  openWhatsApp(phone, text);
+  sendWhatsApp(phone, text);
 }
