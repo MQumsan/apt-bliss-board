@@ -12,15 +12,23 @@ function openPrintWindow(html: string) {
 function promptPhone(): string | null {
   const phone = window.prompt('أدخل رقم هاتف المستأجر (مثال: 96899123456)\nEnter tenant phone number (e.g. 96899123456):');
   if (!phone || !phone.trim()) return null;
-  return phone.trim().replace(/[^0-9+]/g, '');
+  let cleaned = phone.trim().replace(/[\s\-\+\(\)]/g, '');
+  if (!cleaned.startsWith('968') && cleaned.length <= 8) {
+    cleaned = '968' + cleaned;
+  }
+  return cleaned;
 }
 
-function openWhatsApp(phone: string | null, text: string) {
+function sendWhatsApp(phone: string | null, text: string) {
   const encoded = encodeURIComponent(text);
-  if (phone) {
-    window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
-  } else {
-    window.open(`https://wa.me/?text=${encoded}`, '_blank');
+  const url = phone
+    ? `https://api.whatsapp.com/send?phone=${phone}&text=${encoded}`
+    : `https://api.whatsapp.com/send?text=${encoded}`;
+  const win = window.open(url, '_blank');
+  if (!win) {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('تم نسخ الرسالة. الصقها في واتساب.\nMessage copied. Paste it in WhatsApp.');
+    });
   }
 }
 
