@@ -88,9 +88,11 @@ export function printReceipt(record: IncomeRecord, lang: 'en' | 'ar') {
 </body></html>`);
 }
 
-export function shareReceiptWhatsApp(record: IncomeRecord, _lang: 'en' | 'ar') {
+export function shareReceiptWhatsApp(record: IncomeRecord, lang: 'en' | 'ar') {
   const receiptId = record.id.replace('inc-', '').toUpperCase().slice(0, 8);
-  const text = `🏢 *المشرق للتطوير العقاري* 🏢
+  const isAr = lang === 'ar';
+  const text = isAr
+    ? `🏢 *المشرق للتطوير العقاري* 🏢
 
 *إشعار سند قبض جديد*
 ---------------------------
@@ -101,9 +103,21 @@ export function shareReceiptWhatsApp(record: IncomeRecord, _lang: 'en' | 'ar') {
 📑 *رقم السند:* ${receiptId}
 ---------------------------
 نشكركم لثقتكم بنا.
-📍 مسقط، سلطنة عُمان`;
+📍 مسقط، سلطنة عُمان`
+    : `🏢 *Al Mashreq Real Estate Development* 🏢
+
+*New Payment Receipt*
+---------------------------
+👤 *Tenant:* ${record.tenantName}
+💰 *Amount:* ${record.amount.toLocaleString('en', { minimumFractionDigits: 3 })} OMR
+🗓️ *Date:* ${record.date}
+📝 *Statement:* ${record.statement}
+📑 *Receipt No:* ${receiptId}
+---------------------------
+Thank you for your trust.
+📍 Muscat, Sultanate of Oman`;
   const phone = promptPhone();
-  openWhatsApp(phone, text);
+  sendWhatsApp(phone, text);
 }
 
 export function printExpenseVoucher(record: ExpenseRecord, lang: 'en' | 'ar') {
